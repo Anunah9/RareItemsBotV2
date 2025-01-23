@@ -1,6 +1,7 @@
+import os
+import pickle
 from steampy.client import SteamClient
 import requests
-
 
 
 class ISteamSession:
@@ -22,30 +23,32 @@ class SteamSession(ISteamSession):
         # TODO Передавать эти данные в файле конфигурации
         self.fake_steam_guard_file = "./fake_steam_guard.txt"
         self.username, self.password = username, password
-        self.steam_client = SteamClient("", self.username, self.password)
+        self.session: requests.Session | None = None
 
     def login(self):
         print(self.username, self.password)
-        self.steam_client.login(
-            self.username, self.password, self.fake_steam_guard_file
-        )
+        steam_client = SteamClient("", self.username, self.password)
+        steam_client.login(self.username, self.password, self.fake_steam_guard_file)
+        self.session = steam_client._session
 
-    def get_session(self) -> requests.Session:
-        return self.steam_client._session
-
-    def save_session(self):
+    def save_session(self, path):
         # Сохранение сессии
-        pass
+        res_path = os.path.join(path, self.username)
+        with open(res_path, "wb") as f:
+            pickle.dump(self.session, f)
 
-    def load_session(self):
+    def load_session(self, path):
         # Загрузка сессии
-        pass
+        res_path = os.path.join(path, self.username)
+        if self.username not in os.listdir(path):
+            raise Exception("No file for load. Try save_session first.")
+        with open(res_path, "rb") as f:
+            self.session = pickle.load(f)
 
     def is_alive(self):
         # Проверка активности сессии
         url = "https://steamcommunity.com/market/"
-        session = self.get_session()
-        response = session.get(url)
+        response = self.session.get(url)
         if response.text.find(self.username) > 0:
             return True
         else:

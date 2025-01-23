@@ -3,13 +3,13 @@ from bs4 import BeautifulSoup
 import requests
 from assets.session import SteamSession
 
+
 class Parser:
     def __init__(self, session: SteamSession):
         self.steam_session: SteamSession = session
-        self.req_session: requests.Session = session.get_session()
 
     def get_items_from_market(self, url):
-        response = self.req_session.get(url)
+        response = self.steam_session.session.get(url)
 
         if response.status_code != 200:
             raise Exception(
