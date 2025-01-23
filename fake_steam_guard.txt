@@ -1,0 +1,5 @@
+{
+    "steamid": "just random not empty string",
+    "shared_secret": "just random not empty string",
+    "identity_secret": "just random not empty string"
+}
