@@ -54,7 +54,7 @@ class Currency:
     def change_currency(
         self, price, start_currency_id: int, target_currency_id: int = -1
     ):
-        """Convert price for target currency. If target not provided convert to USD by defalt."""
+        """Convert price for target currency. If target not provided convert to DEFAULT_CURRENCY by defalt."""
         if target_currency_id == -1:
             target_currency_id = self.DEFAULT_CURRENCY
         start_currency_definition = self.rates_ids[start_currency_id % 100]

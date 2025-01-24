@@ -2,10 +2,10 @@ import os
 import pickle
 from steampy.client import SteamClient
 import requests
-from abc import ABC, abstractmethod
+from typing import Protocol
 
 
-class ISteamSession:
+class ISteamSession(Protocol):
     def login(self, username, password):
         pass
 
@@ -19,12 +19,10 @@ class ISteamSession:
         pass
 
 
-class ISteamClient(ABC):
-    @abstractmethod
+class ISteamClient(Protocol):
     def login(self, username, password, steam_guard_file):
         pass
 
-    @abstractmethod
     def get_session(self):
         pass
 
