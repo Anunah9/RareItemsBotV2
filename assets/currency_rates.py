@@ -46,15 +46,17 @@ class Currency:
         41: "UYU",
     }
 
-    def __init__(self, api_key):
+    def __init__(self, api_key, default_currency=5):
         self.api_key = api_key
         self.rates: dict | None = None
+        self.DEFAULT_CURRENCY = 5
 
     def change_currency(
-        self, price, start_currency_id: int, target_currency_id: int = 1
+        self, price, start_currency_id: int, target_currency_id: int = -1
     ):
         """Convert price for target currency. If target not provided convert to USD by defalt."""
-
+        if target_currency_id == -1:
+            target_currency_id = self.DEFAULT_CURRENCY
         start_currency_definition = self.rates_ids[start_currency_id % 100]
         target_currency_definition = self.rates_ids[target_currency_id % 100]
         start_currency_value = self.rates[start_currency_definition]
