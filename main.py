@@ -1,4 +1,5 @@
 from assets.parser import Parser
+from assets.prices import MockItemPriceFetcher
 from assets.session import SteamSession, SteamPyClient
 from assets.bot import SteamBot
 from assets.currency_rates import Currency
@@ -37,7 +38,8 @@ def create_bot():
     currency_rates.update_steam_currency_rates()
     parser = Parser(steam_session, currency_rates)
     item_info_fetcher = MockItemInfoFetcher()
-    return SteamBot(steam_session, parser, item_info_fetcher)
+    item_price_fetcher = MockItemPriceFetcher()
+    return SteamBot(steam_session, parser, item_info_fetcher, item_price_fetcher)
 
 
 def main():

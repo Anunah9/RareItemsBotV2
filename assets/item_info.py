@@ -16,10 +16,16 @@ class IItemInfoFetcher(Protocol):
 
 class MockItemInfoFetcher(IItemInfoFetcher):
     def get_info(self, inspect_link):
-        return {"stickers": [1, 2, 3], "charm": 1433}
+        return {
+            "stickers": [
+                {"name": "Liquid Fire", "wear": 0.5},
+                {"name": "Navi", "wear": 0.1},
+            ],
+            "charm": [{"name": "Loh"}, {"name": "Pidor"}],
+        }
 
     def extract_sticker_info(self, item_info):
-        print(item_info["stickers"])
+        return item_info["stickers"]
 
     def extract_charm_info(self, item_info):
-        print(item_info["charm"])
+        return item_info["charm"]
