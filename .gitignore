@@ -3,3 +3,4 @@ proxies.txt
 __pycache__
 venv
 accounts/
+.env
