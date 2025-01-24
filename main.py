@@ -1,4 +1,4 @@
-from assets.session import SteamSession
+from assets.session import SteamSession, SteamPyClient
 from assets.bot import SteamBot
 from assets.currency_rates import Currency
 import os
@@ -11,7 +11,9 @@ if os.path.exists(dotenv_path):
 
 if __name__ == "__main__":
     API_KEY = os.getenv("API_KEY")
-    steam_session = SteamSession("arinugraha31", "arinugraha123")
+    steamclient = SteamPyClient()
+    steam_session = SteamSession(steamclient, "arinugraha31", "arinugraha123")
+    steam_session.login()
     try:
         steam_session.load_session("./accounts/")
     except:

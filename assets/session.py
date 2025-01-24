@@ -2,6 +2,7 @@ import os
 import pickle
 from steampy.client import SteamClient
 import requests
+from abc import ABC, abstractmethod
 
 
 class ISteamSession:
@@ -18,18 +19,40 @@ class ISteamSession:
         pass
 
 
+class ISteamClient(ABC):
+    @abstractmethod
+    def login(self, username, password, steam_guard_file):
+        pass
+
+    @abstractmethod
+    def get_session(self):
+        pass
+
+
+class SteamPyClient(ISteamClient):
+    def __init__(self):
+        self._client = None
+
+    def login(self, username, password, steam_guard_file):
+        from steampy.client import SteamClient
+
+        self._client = SteamClient("", username, password)
+        self._client.login(username, password, steam_guard_file)
+
+    def get_session(self):
+        return self._client._session
+
+
 class SteamSession(ISteamSession):
-    def __init__(self, username, password):
-        # TODO Передавать эти данные в файле конфигурации
-        self.fake_steam_guard_file = "./fake_steam_guard.txt"
-        self.username, self.password = username, password
-        self.session: requests.Session | None = None
+    def __init__(self, client: ISteamClient, username, password):
+        self.client = client
+        self.session = None
+        self.username = username
+        self.password = password
 
     def login(self):
-        print(self.username, self.password)
-        steam_client = SteamClient("", self.username, self.password)
-        steam_client.login(self.username, self.password, self.fake_steam_guard_file)
-        self.session = steam_client._session
+        self.client.login(self.username, self.password, "./fake_steam_guard.txt")
+        self.session = self.client.get_session()
 
     def save_session(self, path):
         # Сохранение сессии
@@ -49,7 +72,4 @@ class SteamSession(ISteamSession):
         # Проверка активности сессии
         url = "https://steamcommunity.com/market/"
         response = self.session.get(url)
-        if response.text.find(self.username) > 0:
-            return True
-        else:
-            return False
+        return self.username in response.text
