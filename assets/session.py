@@ -49,7 +49,8 @@ class SteamSession(ISteamSession):
         self.password = password
 
     def login(self):
-        self.client.login(self.username, self.password, "./fake_steam_guard.txt")
+        self.client.login(self.username, self.password,
+                          "./fake_steam_guard.txt")
         self.session = self.client.get_session()
 
     def save_session(self, path):
