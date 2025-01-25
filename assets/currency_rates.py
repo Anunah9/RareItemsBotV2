@@ -57,6 +57,7 @@ class Currency:
         """Convert price for target currency. If target not provided convert to DEFAULT_CURRENCY by defalt."""
         if target_currency_id == -1:
             target_currency_id = self.DEFAULT_CURRENCY
+        # Остаток от деление на 100 так как изначально currency id приходит в виде 20xx
         start_currency_definition = self.rates_ids[start_currency_id % 100]
         target_currency_definition = self.rates_ids[target_currency_id % 100]
         start_currency_value = self.rates[start_currency_definition]
@@ -67,6 +68,7 @@ class Currency:
     def update_steam_currency_rates(
         self,
     ):
+        """Обновляет куры валют на актуальные. (Пока что вызов этой функции обязателен перд использоавнием)"""
         params = {
             "key": self.api_key,
             "format": "json",
