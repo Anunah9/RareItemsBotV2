@@ -5,7 +5,7 @@ from assets.bot import SteamBot
 from assets.currency_rates import Currency
 import os
 from dotenv import load_dotenv
-from assets.item_info import MockItemInfoFetcher
+from assets.inspect import MockItemInfoFetcher, ItemInfoFetcher
 
 # Загрузка переменных окружения
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -37,7 +37,7 @@ def create_bot():
     currency_rates = Currency(API_KEY)
     currency_rates.update_steam_currency_rates()
     parser = Parser(steam_session, currency_rates)
-    item_info_fetcher = MockItemInfoFetcher()
+    item_info_fetcher = ItemInfoFetcher()
     item_price_fetcher = MockItemPriceFetcher()
     return SteamBot(steam_session, parser, item_info_fetcher, item_price_fetcher)
 

@@ -2,6 +2,16 @@ from functools import reduce
 from assets.item import ItemData
 
 
+def construct_inspect_link(item_data: dict, listing_id: str) -> str:
+    """Формирует inspect link из данных"""
+    raw_inspect_link = item_data.get("asset").get(
+        "market_actions")[0].get("link")
+    asset_id = item_data.get("asset").get("id")
+    return raw_inspect_link.replace("%listingid%", listing_id).replace(
+        "%assetid%", asset_id
+    )
+
+
 def create_message(item: ItemData):
 
     message = f"🌟 **{item.item_name}** 🌟\n"

@@ -3,7 +3,7 @@ from assets.parser import Parser
 from assets.session import ISteamSession
 from assets.item import ItemData
 from pprint import pprint
-from assets.item_info import MockItemInfoFetcher
+from assets.inspect import MockItemInfoFetcher
 from assets.prices import MockItemPriceFetcher
 from assets.utils import create_message
 
@@ -37,7 +37,6 @@ class SteamBot:
 
     def get_item_info(self, inspect_link):
         item_info = self.get_sticker_and_charm_info(inspect_link)
-
         stickers = self.extract_sticker_info(item_info)
         for sticker in stickers:
             sticker["price"] = self.itemPriceFetcher.get_price_by_name(

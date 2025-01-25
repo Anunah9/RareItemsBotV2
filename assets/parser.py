@@ -3,6 +3,7 @@ from assets.currency_rates import Currency
 from assets.session import SteamSession
 import json
 from pprint import pprint
+from assets.utils import construct_inspect_link
 
 
 class Parser:
@@ -36,20 +37,11 @@ class Parser:
         price = (price_no_fee + fee) / 100
         return self.currency.change_currency(price, currency_id)
 
-    def construct_inspect_link(self, item_data: dict, listing_id: str) -> str:
-        """Формирует inspect link из данных"""
-        raw_inspect_link = item_data.get("asset").get(
-            "market_actions")[0].get("link")
-        asset_id = item_data.get("asset").get("id")
-        return raw_inspect_link.replace("listingid", listing_id).replace(
-            "assetid", asset_id
-        )
-
     def extract_item_data(self, items_json: dict) -> list[dict]:
         """Формирует список данных о предметах."""
         extracted_items = []
         for listing_id, item_data in items_json.items():
-            inspect_link = self.construct_inspect_link(item_data, listing_id)
+            inspect_link = construct_inspect_link(item_data, listing_id)
             price = self.calculate_price(item_data)
             extracted_items.append(
                 {
