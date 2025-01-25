@@ -4,7 +4,7 @@ from typing import Protocol
 
 
 class IItemInfoFetcher(Protocol):
-    def get_info(self, inspect_link: str) -> dict:
+    def get_sticker_and_charm_info(self, inspect_link: str) -> dict:
         """Получает полную информацию о предмете от inspect сервера"""
         pass
 
@@ -18,7 +18,7 @@ class IItemInfoFetcher(Protocol):
 
 
 class MockItemInfoFetcher(IItemInfoFetcher):
-    def get_info(self, inspect_link):
+    def get_sticker_and_charm_info(self, inspect_link):
         return {
             "stickers": [
                 {"name": "Liquid Fire", "wear": 0.5},
