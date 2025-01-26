@@ -66,77 +66,44 @@ class SteamBot:
 
     def get_items_from_market(self, item_url):
         raw_data = self.parser.get_raw_data_from_market(item_url)
-        json_data = self.parser.exract_json_from_raw_data(raw_data=raw_data)
+        json_data = self.parser.extract_json_from_raw_data(raw_data=raw_data)
         return self.parser.extract_item_data(json_data)
 
     def start(self):
         if self.session.is_alive():
             print("Bot started with an active session.")
-            # Test version with hardcodede item
             item_name = "AK-47|Slate (Field-Tested)"
             item_url = "https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
             items = self.get_items_from_market(item_url)
             self.process_items(item_name, items)
 
     def process_items(self, item_name, items):
+
+        if not items:
+            print(items)
+            raise Exception("No items :(")
         for item in items:
             listing_id = item.get("listing_id")
             price = item.get("price")
             inspect_link = item.get("inspect_link")
-            item_obj = ItemData(item_name, listing_id, inspect_link,
-                                price, *self.get_sticker_and_charm_info(inspect_link))
 
-            decision = self.calculate_sticker_profitability(item_obj)
+            item_obj = ItemData(self.itemInfoFetcher, self.itemPriceFetcher,
+                                item_name, listing_id, inspect_link, price)
+            item_obj.update_item_info()
+            # print(item_obj.__dict__)
             message = create_message(item_obj)
+            decision = self.calculate_sticker_profitability(item_obj)
+
             print(message)
 
-    def get_sticker_and_charm_info(self, inspect_link):
-        item_info = self.itemInfoFetcher.get_sticker_and_charm_info(
-            inspect_link=inspect_link)
-        stickers = self.extract_sticker_info(item_info)
-        for sticker in stickers:
-            sticker["price"] = self.itemPriceFetcher.get_price_by_name(
-                sticker.get("name"))
-
-        stickers_price = self.get_stickers_sum_price(stickers)
-        charm = self.extract_charm_info(item_info)
-        charm_price = self.get_charm_price(charm)
-        return stickers, stickers_price, charm, charm_price
-
-    def extract_sticker_info(self, item_info):
-        return self.itemInfoFetcher.extract_sticker_info(item_info)
-
-    def get_stickers_sum_price(self, stickers: list[dict]):
-        result_price = 0
-        for sticker in stickers:
-            result_price += sticker['price']
-        return result_price
-
-    def extract_charm_info(self, item_info):
-        return self.itemInfoFetcher.extract_charm_info(item_info)
-
-    def get_charm_price(self, charm):
-        return self.itemPriceFetcher.get_price_by_name(charm.get("name"))
-
     def print_log(item: ItemData):
-        print(
-            f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}")
+        print(f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}")
 
     def calculate_sticker_profitability(self, item: ItemData):
-        """Функция определения выгодности лота. Общая стоимость стикеров / стоимость лота"""
         sticker_profitability = item.stickers_price / item.item_price
         return sticker_profitability
 
-    def get_strick_counter(stickers: list[dict]):
-        strick_dict = {}
-        for sticker in stickers:
-            if sticker.get("name") not in strick_dict:
-                strick_dict[sticker["name"]] = 1
-            else:
-                strick_dict[sticker["name"]] += 1
-        return
-
     def get_decision(self, item: ItemData) -> bool:
-        """Принимает решаение"""
-        strick = self.get_strick_counter()
-        return False
+
+        # Пример логики принятия решения по стрикам
+        return

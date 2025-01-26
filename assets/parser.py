@@ -20,7 +20,7 @@ class Parser:
             )
         return response.text
 
-    def exract_json_from_raw_data(self, raw_data: str):
+    def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
         items = str(
