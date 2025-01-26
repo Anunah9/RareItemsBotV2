@@ -90,7 +90,6 @@ class SteamBot:
             item_obj = ItemData(self.itemInfoFetcher, self.itemPriceFetcher,
                                 item_name, listing_id, inspect_link, price)
             item_obj.update_item_info()
-            # print(item_obj.__dict__)
             message = create_message(item_obj)
             decision = self.calculate_sticker_profitability(item_obj)
 

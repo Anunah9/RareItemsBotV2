@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Counter
 
 from assets.inspect import IItemInfoFetcher
 from assets.prices import IItemPriceFetcher
@@ -11,15 +12,9 @@ class StickerStrick:
     sum_price_strick: float
 
     def update_strick_counter(self, stickers):
-        strick_dict = {}
-        for sticker in stickers:
-            if sticker.get("name") not in strick_dict:
-                strick_dict[sticker["name"]] = 1
-            else:
-                strick_dict[sticker["name"]] += 1
-
-        strick = list(filter(
-            lambda x: x[1] >= 3, strick_dict.items()))
+        sticker_names = [sticker.get("name") for sticker in stickers]
+        strick_dict = dict(Counter(sticker_names))
+        strick = list(filter(lambda x: x[1] >= 3, strick_dict.items()))
         print(strick)
         if not strick:
             self.strick = False
@@ -63,13 +58,20 @@ class ItemData:
             self.charm.get("name"))
 
     def update_item_info(self):
+        # All info about item
         item_info = self.itemInfoFetcher.get_sticker_and_charm_info(
             self.inspect_link)
+
+        # Stickers
         self.stickers = self.extract_sticker_info(item_info)
         self.update_stickers_prices()
         self.stickers_price = self.get_stickers_sum_price(self.stickers)
+
+        # Charm
         self.charm = self.extract_charm_info(item_info)
         self.charm_price = self.get_charm_price()
+
+        # Strick
         self.strick = StickerStrick()
         self.strick.update_strick_counter(self.stickers)
 
