@@ -116,13 +116,15 @@ class SteamBot:
                 sticker_profitability = item.strick.sum_price_strick / item.item_price
                 if sticker_profitability > profit_threshold:
                     print("Покупаем")
+                    return True
         else:
             # Когда стрика нет, используем базовую цену стикеров
             sticker_profitability = item.stickers_price / item.item_price
             if sticker_profitability > self.config.nostrick:
                 print("Покупаем")
+                return True
 
-        return sticker_profitability
+        return False
 
     def get_decision(self, item: ItemData) -> bool:
 

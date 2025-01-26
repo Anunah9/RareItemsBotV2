@@ -5,3 +5,4 @@ venv
 accounts/
 .env
 .vscode
+db.db
