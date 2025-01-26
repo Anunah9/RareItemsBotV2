@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Protocol
+from assets.config import Config
 from assets.parser import Parser
 from assets.session import ISteamSession
 from assets.item import ItemData
@@ -58,11 +59,13 @@ class SteamBot:
         parser: Parser,
         itemInfoFetcher: MockItemInfoFetcher,
         itemPriceFetcher: IItemPriceFetcher,
+        config: Config
     ):
         self.session = session
         self.parser = parser
         self.itemInfoFetcher = itemInfoFetcher
         self.itemPriceFetcher = itemPriceFetcher
+        self.config: Config = config
 
     def get_items_from_market(self, item_url):
         raw_data = self.parser.get_raw_data_from_market(item_url)
@@ -85,21 +88,40 @@ class SteamBot:
         for item in items:
             listing_id = item.get("listing_id")
             price = item.get("price")
+            if not price:
+                print("Item sold")
+                continue
             inspect_link = item.get("inspect_link")
 
             item_obj = ItemData(self.itemInfoFetcher, self.itemPriceFetcher,
                                 item_name, listing_id, inspect_link, price)
             item_obj.update_item_info()
             message = create_message(item_obj)
-            decision = self.calculate_sticker_profitability(item_obj)
-
             print(message)
+            decision = self.calculate_sticker_profitability(item_obj)
 
     def print_log(item: ItemData):
         print(f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}")
 
     def calculate_sticker_profitability(self, item: ItemData):
-        sticker_profitability = item.stickers_price / item.item_price
+        # Если есть стрик, логику вычисления
+        if item.strick.strick:
+            profit_threshold = {
+                3: self.config.strick3,
+                4: self.config.strick45,
+                5: self.config.strick45
+            }.get(item.strick.strick_count)
+
+            if profit_threshold:
+                sticker_profitability = item.strick.sum_price_strick / item.item_price
+                if sticker_profitability > profit_threshold:
+                    print("Покупаем")
+        else:
+            # Когда стрика нет, используем базовую цену стикеров
+            sticker_profitability = item.stickers_price / item.item_price
+            if sticker_profitability > self.config.nostrick:
+                print("Покупаем")
+
         return sticker_profitability
 
     def get_decision(self, item: ItemData) -> bool:

@@ -6,7 +6,7 @@ from typing import Protocol
 class IItemPriceFetcher(Protocol):
     def __init__(db_repostiotory):
         pass
-    
+
     def get_price_by_name(self, item_name: str) -> float:
         """Возвращает стоимость предмета по его названию"""
         pass
@@ -14,6 +14,4 @@ class IItemPriceFetcher(Protocol):
 
 class MockItemPriceFetcher(IItemPriceFetcher):
     def get_price_by_name(self, item_name):
-        return 1
-
-    
+        return 500
