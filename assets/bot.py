@@ -87,7 +87,7 @@ class SteamBot:
                                 price, *self.get_sticker_and_charm_info(inspect_link))
 
             decision = self.calculate_sticker_profitability(item_obj)
-            message = create_message(item)
+            message = create_message(item_obj)
             print(message)
 
     def get_sticker_and_charm_info(self, inspect_link):
@@ -127,6 +127,16 @@ class SteamBot:
         sticker_profitability = item.stickers_price / item.item_price
         return sticker_profitability
 
+    def get_strick_counter(stickers: list[dict]):
+        strick_dict = {}
+        for sticker in stickers:
+            if sticker.get("name") not in strick_dict:
+                strick_dict[sticker["name"]] = 1
+            else:
+                strick_dict[sticker["name"]] += 1
+        return
+
     def get_decision(self, item: ItemData) -> bool:
-        """Принимает решаение исходя из фактора """
+        """Принимает решаение"""
+        strick = self.get_strick_counter()
         return False
