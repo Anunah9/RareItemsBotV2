@@ -1,6 +1,6 @@
 from assets.config import Config
 from assets.parser import Parser
-from assets.prices import MockItemPriceFetcher
+from assets.prices import ItemPriceFetcher, MockItemPriceFetcher, PricesRepository
 from assets.session import SteamSession, SteamPyClient
 from assets.bot import SteamBot
 from assets.currency_rates import Currency
@@ -38,14 +38,21 @@ def create_bot():
     currency_rates = Currency(API_KEY)
     currency_rates.update_steam_currency_rates()
     parser = Parser(steam_session, currency_rates)
-    item_info_fetcher = ItemInfoFetcher()
-    item_price_fetcher = MockItemPriceFetcher()
+
+    item_info_fetcher = MockItemInfoFetcher()
+    # item_price_fetcher = MockItemPriceFetcher()
+
+    price_repository = PricesRepository("./db.db")
+    item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
+    # item_price_fetcher.update_all_prices(currency=currency_rates)
 
     strick3 = float(os.getenv("STRICK3"))
     strick45 = float(os.getenv("STRICK45"))
     nostrick = float(os.getenv("NOSTRICK"))
     config = Config(strick3, strick45, nostrick)
-    return SteamBot(steam_session, parser, item_info_fetcher, item_price_fetcher, config)
+    return SteamBot(
+        steam_session, parser, item_info_fetcher, item_price_fetcher, config
+    )
 
 
 def main():

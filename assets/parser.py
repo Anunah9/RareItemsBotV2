@@ -23,8 +23,8 @@ class Parser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(
-            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+
         return json.loads(items)
 
     def calculate_price(self, item_data: dict) -> float:
