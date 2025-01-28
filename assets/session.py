@@ -73,3 +73,44 @@ class SteamSession(ISteamSession):
         url = "https://steamcommunity.com/market/"
         response = self.session.get(url)
         return self.username in response.text
+
+
+class AsyncSteamSession(ISteamSession):
+    def __init__(self, client: ISteamClient, username: str, password: str):
+        self.client = client
+        self.sync_session: requests.Session
+        self.async_session: ClientSession
+        self.username = username
+        self.password = password
+
+    def login(self):
+        self.client.login(self.username, self.password,
+                          "./fake_steam_guard.txt")
+        self.sync_session = self.client.get_session()
+
+    def convert_sync_to_async_session(self):
+        # Можете передать заголовки из вашей существующей сессии
+        headers = self.session.headers
+        cookie_jar = self.session.cookies
+        self.async_session = ClientSession(
+            headers=headers, cookies=cookie_jar.get_dict("steamcommunity.com"))
+
+    def save_session(self, path):
+        # Сохранение сессии
+        res_path = os.path.join(path, self.username)
+        with open(res_path, "wb") as f:
+            pickle.dump(self.async_session, f)
+
+    def load_session(self, path):
+        # Загрузка сессии
+        res_path = os.path.join(path, self.username)
+        if self.username not in os.listdir(path):
+            raise Exception("No file for load. Try save_session first.")
+        with open(res_path, "rb") as f:
+            self.async_session = pickle.load(f)
+
+    async def is_alive(self):
+        # Проверка активности сессии
+        url = "https://steamcommunity.com/market/"
+        response = await self.async_session.get(url)
+        return self.username in response.text
