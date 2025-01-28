@@ -29,7 +29,7 @@ class PricesRepository(IPricesRepository):
 
     def get_price_by_name(self, item_name):
         query = f'SELECT price FROM StickerPrices WHERE name LIKE "%{item_name}"'
-        print(query)
+        # print(query)
         price = self.db.cursor().execute(query).fetchone()
         return price[0] if price else 0
 
@@ -82,7 +82,8 @@ class ItemPriceFetcher:
                 sticker_price = sticker["pricelatest"] or sticker["priceavg7d"]
                 # print(sticker_name, sticker_price)
                 converted_price = currency.change_currency(sticker_price, 1001)
-                self.repository.update_price(sticker_name, round(converted_price, 2))
+                self.repository.update_price(
+                    sticker_name, round(converted_price, 2))
 
         self.repository.db.commit()
         print("Цены обновлены.")
@@ -95,5 +96,6 @@ if __name__ == "__main__":
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
     item_price_fetcher.update_all_prices(currency=currency_rates)
-    price = item_price_fetcher.get_price_by_name("AMKAL ESPORTS | Copenhagen 2024")
+    price = item_price_fetcher.get_price_by_name(
+        "AMKAL ESPORTS | Copenhagen 2024")
     print(price)

@@ -15,7 +15,7 @@ class StickerStrick:
         sticker_names = [sticker.get("name") for sticker in stickers]
         strick_dict = dict(Counter(sticker_names))
         strick = list(filter(lambda x: x[1] >= 3, strick_dict.items()))
-        print(strick)
+        # print(strick)
         if not strick:
             self.strick = False
         else:

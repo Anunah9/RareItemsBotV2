@@ -3,6 +3,7 @@ import pickle
 from steampy.client import SteamClient
 import requests
 from typing import Protocol
+from aiohttp.client import ClientSession
 
 
 class ISteamSession(Protocol):

@@ -39,12 +39,14 @@ def create_bot():
     currency_rates.update_steam_currency_rates()
     parser = Parser(steam_session, currency_rates)
 
-    item_info_fetcher = MockItemInfoFetcher()
+    # item_info_fetcher = MockItemInfoFetcher()
     # item_price_fetcher = MockItemPriceFetcher()
+
+    item_info_fetcher = ItemInfoFetcher()
 
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
-    # item_price_fetcher.update_all_prices(currency=currency_rates)
+    item_price_fetcher.update_all_prices(currency=currency_rates)
 
     strick3 = float(os.getenv("STRICK3"))
     strick45 = float(os.getenv("STRICK45"))
