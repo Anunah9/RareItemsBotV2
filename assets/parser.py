@@ -15,11 +15,11 @@ class AsyncParser:
     async def get_raw_data_from_market(self, url: str) -> str:
         """Возвраает сырые json даные о списке лотов с ТП"""
         response = await self.steam_session.async_session.get(url)
-        if response.status_code != 200:
+        if response.status != 200:
             raise Exception(
-                f"Response complete with code error: {response.status_code}"
+                f"Response complete with code error: {response.status}"
             )
-        return response.text
+        return await response.text()
 
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")

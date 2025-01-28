@@ -90,8 +90,8 @@ class AsyncSteamSession(ISteamSession):
 
     def convert_sync_to_async_session(self):
         # Можете передать заголовки из вашей существующей сессии
-        headers = self.session.headers
-        cookie_jar = self.session.cookies
+        headers = self.sync_session.headers
+        cookie_jar = self.sync_session.cookies
         self.async_session = ClientSession(
             headers=headers, cookies=cookie_jar.get_dict("steamcommunity.com"))
 
@@ -99,7 +99,7 @@ class AsyncSteamSession(ISteamSession):
         # Сохранение сессии
         res_path = os.path.join(path, self.username)
         with open(res_path, "wb") as f:
-            pickle.dump(self.async_session, f)
+            pickle.dump(self.sync_session, f)
 
     def load_session(self, path):
         # Загрузка сессии
@@ -107,10 +107,10 @@ class AsyncSteamSession(ISteamSession):
         if self.username not in os.listdir(path):
             raise Exception("No file for load. Try save_session first.")
         with open(res_path, "rb") as f:
-            self.async_session = pickle.load(f)
+            self.sync_session = pickle.load(f)
 
     async def is_alive(self):
         # Проверка активности сессии
         url = "https://steamcommunity.com/market/"
         response = await self.async_session.get(url)
-        return self.username in response.text
+        return self.username in await response.text()
