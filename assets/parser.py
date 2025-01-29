@@ -5,27 +5,35 @@ import json
 from pprint import pprint
 from assets.utils import construct_inspect_link
 import aiohttp
+from assets.proxy import ProxyManager
 
 
 class AsyncParser:
-    def __init__(self, session: AsyncSteamSession, currency: Currency):
+    def __init__(
+        self,
+        session: AsyncSteamSession,
+        currency: Currency,
+        proxy_manager: ProxyManager,
+    ):
         self.steam_session: AsyncSteamSession = session
         self.currency: Currency = currency
+        self.proxy_manager: ProxyManager = proxy_manager
 
     async def get_raw_data_from_market(self, url: str) -> str:
         """Возвраает сырые json даные о списке лотов с ТП"""
-        response = await self.steam_session.async_session.get(url)
-        if response.status != 200:
-            raise Exception(
-                f"Response complete with code error: {response.status}"
-            )
-        return await response.text()
+        proxy = self.proxy_manager.get_random_proxy()
+        print(proxy)
+        print("Проверка сессии: ", await self.steam_session.is_alive())
+        async with self.steam_session.get_async_session() as local_session:
+            response = await local_session.get(url, proxy=proxy)
+            if response.status != 200:
+                raise Exception(f"Response complete with code error: {response.status}")
+            return await response.text()
 
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(
-            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 
@@ -72,8 +80,7 @@ class Parser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(
-            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 

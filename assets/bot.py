@@ -60,7 +60,7 @@ class SteamBot:
         parser: Parser,
         itemInfoFetcher: MockItemInfoFetcher,
         itemPriceFetcher: IItemPriceFetcher,
-        config: Config
+        config: Config,
     ):
         self.session = session
         self.parser = parser
@@ -94,15 +94,23 @@ class SteamBot:
                 continue
             inspect_link = item.get("inspect_link")
 
-            item_obj = ItemData(self.itemInfoFetcher, self.itemPriceFetcher,
-                                item_name, listing_id, inspect_link, price)
+            item_obj = ItemData(
+                self.itemInfoFetcher,
+                self.itemPriceFetcher,
+                item_name,
+                listing_id,
+                inspect_link,
+                price,
+            )
             item_obj.update_item_info()
             message = create_message(item_obj)
             print(message)
             decision = self.calculate_sticker_profitability(item_obj)
 
     def print_log(item: ItemData):
-        print(f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}")
+        print(
+            f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}"
+        )
 
     def calculate_sticker_profitability(self, item: ItemData):
         # Если есть стрик, логику вычисления
@@ -110,7 +118,7 @@ class SteamBot:
             profit_threshold = {
                 3: self.config.strick3,
                 4: self.config.strick45,
-                5: self.config.strick45
+                5: self.config.strick45,
             }.get(item.strick.strick_count)
 
             if profit_threshold:
@@ -140,7 +148,7 @@ class AsyncSteamBot:
         parser: AsyncParser,
         itemInfoFetcher: IItemInfoFetcher,
         itemPriceFetcher: IItemPriceFetcher,
-        config: Config
+        config: Config,
     ):
         self.session = session
         self.parser = parser
@@ -154,6 +162,7 @@ class AsyncSteamBot:
         return self.parser.extract_item_data(json_data)
 
     async def create_one_task(self, item_name, item_url: str, delay: float):
+        await asyncio.sleep(0.1)  # Constant delay
         await asyncio.sleep(delay=delay)
         listings = await self.get_items_from_market(item_url)
         self.process_items(item_name, listings)
@@ -163,17 +172,16 @@ class AsyncSteamBot:
         Создает очередь запросов
         Args:
         items (list[dict]): [{item_name:item_url}, {item_name1:item_url1}] - Список предметов \n
-        batch (int) - 1/batch -  Количество предметов за одну секунду. \n
-        При batch=2 и количестве предметов = 4 в первую секунду создадутся запросы на первые два пердмета, во вторую секунду создадутся следующие два предмета"""
+        batch (int) - items/batch -  Количество предметов за одну секунду. \n
+        При batch=2 и количестве предметов = 4 в первую секунду создадутся запросы на первые два пердмета, во вторую секунду создадутся следующие два предмета
+        """
         tasks = []
-        print("123123123", items)
         for i in range(0, len(items)):
-            delay = i//batch
+            delay = i // batch
             item_name, item_url = next(iter(items[i].items()))
 
             task = self.create_one_task(item_name, item_url, delay=delay)
             tasks.append(task)
-
         return tasks
 
     async def start(self):
@@ -181,15 +189,24 @@ class AsyncSteamBot:
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
         items = [
-            {"AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"},
-
-            {"AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"}
+            {
+                "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
+            },
+            {
+                "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
+            },
         ]
-        for i in range(5):
+        counter = 0
+        comleted_requests = 0
+        while True:
             print("---------------------------------------")
-            print(f"Iteration #{i}")
-            queue = await self.create_task_queue(items=items)
+            print(f"Iteration #{counter}")
+            queue = await self.create_task_queue(items=items, batch=2)
+            print("Запросов в пачке: ", len(queue))
+            comleted_requests += len(queue)
+            print("Всего выполненно запросов: ", comleted_requests)
             await asyncio.gather(*queue)
+            counter += 1
 
     def process_items(self, item_name, items):
 
@@ -204,15 +221,23 @@ class AsyncSteamBot:
                 continue
             inspect_link = item.get("inspect_link")
 
-            item_obj = ItemData(self.itemInfoFetcher, self.itemPriceFetcher,
-                                item_name, listing_id, inspect_link, price)
+            item_obj = ItemData(
+                self.itemInfoFetcher,
+                self.itemPriceFetcher,
+                item_name,
+                listing_id,
+                inspect_link,
+                price,
+            )
             item_obj.update_item_info()
             message = create_message(item_obj)
             print(message)
             decision = self.calculate_sticker_profitability(item_obj)
 
     def print_log(item: ItemData):
-        print(f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}")
+        print(
+            f"Listing {item.listing_id}: Item Price: {item.item_price}, Stickers Price: {item.stickers_price}, Charm Price: {item.charm_price}"
+        )
 
     def calculate_sticker_profitability(self, item: ItemData):
         # Если есть стрик, логику вычисления
@@ -220,7 +245,7 @@ class AsyncSteamBot:
             profit_threshold = {
                 3: self.config.strick3,
                 4: self.config.strick45,
-                5: self.config.strick45
+                5: self.config.strick45,
             }.get(item.strick.strick_count)
 
             if profit_threshold:

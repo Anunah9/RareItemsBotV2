@@ -43,15 +43,15 @@ class SteamPyClient(ISteamClient):
 
 
 class SteamSession(ISteamSession):
-    def __init__(self, client: ISteamClient, username, password):
+    def __init__(self, client: ISteamClient, username, password, path_to_mafile):
         self.client = client
         self.session = None
         self.username = username
         self.password = password
+        self.path_to_mafile = path_to_mafile
 
     def login(self):
-        self.client.login(self.username, self.password,
-                          "./fake_steam_guard.txt")
+        self.client.login(self.username, self.password, self.path_to_mafile)
         self.session = self.client.get_session()
 
     def save_session(self, path):
@@ -76,24 +76,44 @@ class SteamSession(ISteamSession):
 
 
 class AsyncSteamSession(ISteamSession):
-    def __init__(self, client: ISteamClient, username: str, password: str):
-        self.client = client
+    def __init__(
+        self, client: ISteamClient, username: str, password: str, path_to_mafile: str
+    ):
+        self.client: SteamPyClient = client
         self.sync_session: requests.Session
         self.async_session: ClientSession
         self.username = username
         self.password = password
+        self.path_to_mafile = path_to_mafile
 
     def login(self):
-        self.client.login(self.username, self.password,
-                          "./fake_steam_guard.txt")
+        self.client.login(self.username, self.password, self.path_to_mafile)
         self.sync_session = self.client.get_session()
 
-    def convert_sync_to_async_session(self):
+    def get_async_session(self):
         # Можете передать заголовки из вашей существующей сессии
-        headers = self.sync_session.headers
+        headers = {
+            "Host": "steamcommunity.com",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "DNT": "1",
+            "Sec-GPC": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "cross-site",
+            "Priority": "u=0, i",
+        }
         cookie_jar = self.sync_session.cookies
-        self.async_session = ClientSession(
-            headers=headers, cookies=cookie_jar.get_dict("steamcommunity.com"))
+        return ClientSession(
+            headers=headers, cookies=cookie_jar.get_dict("steamcommunity.com")
+        )
+
+    def get_session(self):
+        return self.async_session
 
     def save_session(self, path):
         # Сохранение сессии

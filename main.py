@@ -8,6 +8,7 @@ from assets.currency_rates import Currency
 import os
 from dotenv import load_dotenv
 from assets.inspect import MockItemInfoFetcher, ItemInfoFetcher
+from assets.proxy import ProxyManager
 
 # Загрузка переменных окружения
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -18,11 +19,12 @@ if os.path.exists(dotenv_path):
 async def get_steam_session():
     steamclient = SteamPyClient()
     steam_session = AsyncSteamSession(
-        steamclient, "arinugraha31", "arinugraha123")
+        steamclient, PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE
+    )
 
     try:
         steam_session.load_session("./accounts/")
-        steam_session.convert_sync_to_async_session()
+        steam_session.async_session = steam_session.get_async_session()
         if await steam_session.is_alive():
             print("Successfully loaded session")
             return steam_session
@@ -33,7 +35,7 @@ async def get_steam_session():
     print("Login successful. Saving session...")
     steam_session.save_session("./accounts/")
     print("Save successful")
-    steam_session.convert_sync_to_async_session()
+    steam_session.async_session = steam_session.get_async_session()
     return steam_session
 
 
@@ -41,12 +43,15 @@ async def create_bot():
     steam_session = await get_steam_session()
     currency_rates = Currency(API_KEY)
     currency_rates.update_steam_currency_rates()
-    parser = AsyncParser(steam_session, currency_rates)
 
-    # item_info_fetcher = MockItemInfoFetcher()
+    proxy_manager = ProxyManager()
+    proxy_manager.load_proxies("./proxies.txt")
+    parser = AsyncParser(steam_session, currency_rates, proxy_manager=proxy_manager)
+
+    item_info_fetcher = MockItemInfoFetcher()
     # item_price_fetcher = MockItemPriceFetcher()
 
-    item_info_fetcher = ItemInfoFetcher()
+    # item_info_fetcher = ItemInfoFetcher()
 
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
@@ -68,6 +73,9 @@ async def main():
 
 if __name__ == "__main__":
     API_KEY = os.getenv("API_KEY")
+    PARSER_LOGIN = os.getenv("PARSER_LOGIN")
+    PARSER_PASSWORD = os.getenv("PARSER_PASSWORD")
+    PARSER_MAFILE = os.getenv("PARSER_MAFILE")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.close()
