@@ -11,9 +11,6 @@ from assets.inspect import MockItemInfoFetcher, ItemInfoFetcher
 from assets.proxy import ProxyManager
 
 # Загрузка переменных окружения
-dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
 
 async def get_steam_session():
@@ -25,7 +22,7 @@ async def get_steam_session():
     try:
         steam_session.load_session("./accounts/")
         steam_session.async_session = steam_session.get_async_session()
-        if await steam_session.is_alive():
+        if steam_session.is_alive():
             print("Successfully loaded session")
             return steam_session
     except:
@@ -72,6 +69,9 @@ async def main():
 
 
 if __name__ == "__main__":
+    dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
     API_KEY = os.getenv("API_KEY")
     PARSER_LOGIN = os.getenv("PARSER_LOGIN")
     PARSER_PASSWORD = os.getenv("PARSER_PASSWORD")

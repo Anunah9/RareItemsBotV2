@@ -41,6 +41,9 @@ class SteamPyClient(ISteamClient):
     def get_session(self):
         return self._client._session
 
+    def is_alive(self):
+        return self._client.is_session_alive()
+
 
 class SteamSession(ISteamSession):
     def __init__(self, client: ISteamClient, username, password, path_to_mafile):
@@ -129,8 +132,9 @@ class AsyncSteamSession(ISteamSession):
         with open(res_path, "rb") as f:
             self.sync_session = pickle.load(f)
 
-    async def is_alive(self):
+    def is_alive(self):
         # Проверка активности сессии
-        url = "https://steamcommunity.com/market/"
-        response = await self.async_session.get(url)
-        return self.username in await response.text()
+        # url = "https://steamcommunity.com/market/"
+        # response = await self.async_session.get(url)
+        # return self.username in await response.text()
+        return self.client.is_alive()

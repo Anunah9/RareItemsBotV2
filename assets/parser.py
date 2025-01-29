@@ -22,8 +22,6 @@ class AsyncParser:
     async def get_raw_data_from_market(self, url: str) -> str:
         """Возвраает сырые json даные о списке лотов с ТП"""
         proxy = self.proxy_manager.get_random_proxy()
-        print(proxy)
-        print("Проверка сессии: ", await self.steam_session.is_alive())
         async with self.steam_session.get_async_session() as local_session:
             response = await local_session.get(url, proxy=proxy)
             if response.status != 200:

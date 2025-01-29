@@ -162,7 +162,7 @@ class AsyncSteamBot:
         return self.parser.extract_item_data(json_data)
 
     async def create_one_task(self, item_name, item_url: str, delay: float):
-        await asyncio.sleep(0.1)  # Constant delay
+        await asyncio.sleep(2)  # Constant delay
         await asyncio.sleep(delay=delay)
         listings = await self.get_items_from_market(item_url)
         self.process_items(item_name, listings)
@@ -192,9 +192,9 @@ class AsyncSteamBot:
             {
                 "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
             },
-            {
-                "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
-            },
+            # {
+            #     "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
+            # },
         ]
         counter = 0
         comleted_requests = 0
