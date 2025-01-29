@@ -20,7 +20,7 @@ async def get_steam_session():
     )
 
     try:
-        steam_session.load_session("./accounts/")
+        steam_session.load_cookie_session("./accounts/")
         steam_session.async_session = steam_session.get_async_session()
         if steam_session.is_alive():
             print("Successfully loaded session")
@@ -30,7 +30,7 @@ async def get_steam_session():
 
     steam_session.login()
     print("Login successful. Saving session...")
-    steam_session.save_session("./accounts/")
+    steam_session.save_cookies_session("./accounts/")
     print("Save successful")
     steam_session.async_session = steam_session.get_async_session()
     return steam_session

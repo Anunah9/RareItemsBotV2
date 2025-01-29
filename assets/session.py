@@ -10,10 +10,10 @@ class ISteamSession(Protocol):
     def login(self, username, password):
         pass
 
-    def save_session(self, path):
+    def save_cookies_session(self, path):
         pass
 
-    def load_session(self, path):
+    def load_cookie_session(self, path):
         pass
 
     def is_alive(self):
@@ -55,16 +55,32 @@ class SteamSession(ISteamSession):
 
     def login(self):
         self.client.login(self.username, self.password, self.path_to_mafile)
-        self.session = self.client.get_session()
 
-    def save_session(self, path):
-        # Сохранение сессии
+    def get_session(self):
+        return self.client.get_session()
+
+    def save_cookies_session(self, path):
+        # Сохранение cookie в файл
         res_path = os.path.join(path, self.username)
         with open(res_path, "wb") as f:
             pickle.dump(self.session, f)
 
-    def load_session(self, path):
-        # Загрузка сессии
+    def save_client(self, path):
+        # Сохранение клиента SteamPy в файл
+        res_path = os.path.join(path, self.username + "_client")
+        with open(res_path, "wb") as f:
+            pickle.dump(self.client, f)
+
+    def load_cookie_session(self, path):
+        # Загрузка cookie из файла
+        res_path = os.path.join(path, self.username)
+        if self.username not in os.listdir(path):
+            raise Exception("No file for load. Try save_session first.")
+        with open(res_path, "rb") as f:
+            self.session = pickle.load(f)
+
+    def load_client(self, path):
+        # Загрузка клиента SteamPy из файла
         res_path = os.path.join(path, self.username)
         if self.username not in os.listdir(path):
             raise Exception("No file for load. Try save_session first.")
@@ -91,7 +107,6 @@ class AsyncSteamSession(ISteamSession):
 
     def login(self):
         self.client.login(self.username, self.password, self.path_to_mafile)
-        self.sync_session = self.client.get_session()
 
     def get_async_session(self):
         # Можете передать заголовки из вашей существующей сессии
@@ -110,27 +125,43 @@ class AsyncSteamSession(ISteamSession):
             "Sec-Fetch-Site": "cross-site",
             "Priority": "u=0, i",
         }
-        cookie_jar = self.sync_session.cookies
+        cookie_jar = self.client.get_session().cookies
         return ClientSession(
             headers=headers, cookies=cookie_jar.get_dict("steamcommunity.com")
         )
 
     def get_session(self):
-        return self.async_session
+        return self.client.get_session()
 
-    def save_session(self, path):
-        # Сохранение сессии
+    def save_cookies_session(self, path):
+        # Сохранение cookie в файл
         res_path = os.path.join(path, self.username)
         with open(res_path, "wb") as f:
-            pickle.dump(self.sync_session, f)
+            pickle.dump(self.session, f)
 
-    def load_session(self, path):
-        # Загрузка сессии
+    def save_client(self, path):
+        # Сохранение клиента SteamPy в файл
+        res_path = os.path.join(path, self.username + "_client")
+        with open(res_path, "wb") as f:
+            pickle.dump(self.client, f)
+
+    def load_cookie_session(self, path):
+        # Загрузка cookie из файла
+
         res_path = os.path.join(path, self.username)
         if self.username not in os.listdir(path):
             raise Exception("No file for load. Try save_session first.")
         with open(res_path, "rb") as f:
-            self.sync_session = pickle.load(f)
+            self.session = pickle.load(f)
+
+    def load_client(self, path):
+        # Загрузка клиента SteamPy из файла
+        res_path = os.path.join(path, self.username + "_client")
+        print(res_path)
+        if self.username + "_client" not in os.listdir(path):
+            raise Exception("No file for load. Try save_session first.")
+        with open(res_path, "rb") as f:
+            self.client = pickle.load(f)
 
     def is_alive(self):
         # Проверка активности сессии

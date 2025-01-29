@@ -1,6 +1,7 @@
 import asyncio
 import os
 import time
+import aiohttp.client_exceptions
 from steampy.guard import generate_one_time_code
 import aiohttp
 from dotenv import load_dotenv
@@ -10,34 +11,50 @@ from assets.proxy import ProxyManager
 from assets.session import AsyncSteamSession, SteamPyClient
 
 
-async def create_test_bot():
+def generate_auth_code():
+    print(time.time())
+    print(generate_one_time_code("HJXEBEq1x7L7EzFjFFUHrJ/5NQw=", int(time.time())))
 
-    client = SteamPyClient()
-    print(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
-    session = AsyncSteamSession(
-        client,
-        username=PARSER_LOGIN,
-        password=PARSER_PASSWORD,
-        path_to_mafile=PARSER_MAFILE,
+
+async def get_steam_session():
+    steamclient = SteamPyClient()
+    steam_session = AsyncSteamSession(
+        steamclient, PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE
     )
 
-    session.login()
-    session.load_session("./accounts/")
-    session.async_session = session.get_async_session()
-    print("Проверка сессии: ", session.is_alive())
-    # currency_rates = Currency(API_KEY)
-    # currency_rates.update_steam_currency_rates()
-    return session
+    try:
+        steam_session.load_client("./accounts/")
+        steam_session.async_session = steam_session.get_async_session()
+        if steam_session.is_alive():
+            print("Successfully loaded session")
+            return steam_session
+    except Exception as exc:
+        raise exc
+        # print("Failed to load session. Logging in...")
+
+    steam_session.login()
+    print("Login successful. Saving session...")
+    steam_session.save_client("./accounts/")
+    print("Save successful")
+    steam_session.async_session = steam_session.get_async_session()
+    return steam_session
 
 
 async def check_parser(session: AsyncSteamSession, proxy_manager: ProxyManager, i):
     await asyncio.sleep(i)
-    print(i)
+
     url = "https://steamcommunity.com/market/listings/730/AK-47%20|%20Slate%20(Field-Tested)"
     proxy = proxy_manager.get_random_proxy()
 
-    response = await session.async_session.get(url=url, proxy=proxy, ssl=False)
-    print(response.status)
+    try:
+        response = await session.async_session.get(
+            url=url, proxy=proxy, ssl=False, timeout=5
+        )
+        print("------------------------------")
+        print(response.status)
+        print(i)
+    except await aiohttp.client_exceptions.ClientConnectionError:
+        print("Превышен таймаут семафора")
 
     # async with session.get_async_session() as local_session:
     #     print("session: ", await session.is_alive())
@@ -46,13 +63,13 @@ async def check_parser(session: AsyncSteamSession, proxy_manager: ProxyManager, 
 
 
 async def main():
-    session = await create_test_bot()
+    session = await get_steam_session()
+    print("Проверка сессии: ", session.is_alive())
     proxy_manager = ProxyManager()
     proxy_manager.load_proxies("./proxies.txt")
-    print(time.time())
-    print(generate_one_time_code("HJXEBEq1x7L7EzFjFFUHrJ/5NQw=", int(time.time())))
-    # tasks = [check_parser(session, proxy_manager, i) for i in range(200)]
-    # await asyncio.gather(*tasks)
+
+    tasks = [check_parser(session, proxy_manager, i) for i in range(200)]
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
