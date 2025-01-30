@@ -8,7 +8,7 @@ from assets.item import ItemData
 from pprint import pprint
 from assets.inspect import IItemInfoFetcher, MockItemInfoFetcher
 from assets.prices import IItemPriceFetcher, MockItemPriceFetcher
-from assets.utils import create_message
+from assets.utils import create_message, secundomer
 
 
 class ISteamBot(Protocol):
@@ -156,6 +156,7 @@ class AsyncSteamBot:
         self.itemPriceFetcher = itemPriceFetcher
         self.config: Config = config
 
+    @secundomer
     async def get_items_from_market(self, item_url):
         raw_data = await self.parser.get_raw_data_from_market(item_url)
         json_data = self.parser.extract_json_from_raw_data(raw_data=raw_data)
@@ -165,6 +166,7 @@ class AsyncSteamBot:
     async def create_one_task(self, item_name, item_url: str, delay: float):
         # await asyncio.sleep(2)  # Constant delay
         await asyncio.sleep(delay=delay)
+
         try:
             listings = await self.get_items_from_market(item_url)
         except Exception as exc:
@@ -172,7 +174,7 @@ class AsyncSteamBot:
         else:
             self.process_items(item_name, listings)
 
-    async def create_task_queue(self, items: list[dict], batch=1):
+    async def create_task_queue(self, items: list[dict], batch=1, batch_queue=10):
         """
         Создает очередь запросов
         Args:
@@ -182,12 +184,16 @@ class AsyncSteamBot:
         """
         # TODO Добавить параметр количество запросов в одном цикле. То есть делать не один цикл а 10 как в старом боте
         tasks = []
-        for i in range(0, len(items)):
-            delay = i // batch
-            item_name, item_url = next(iter(items[i].items()))
+        for j in range(batch_queue):
+            for i in range(0, len(items)):
 
-            task = self.create_one_task(item_name, item_url, delay=delay)
-            tasks.append(task)
+                delay = i % batch
+                item_name, item_url = next(iter(items[i].items()))
+
+                task = self.create_one_task(
+                    item_name, item_url, delay=j * batch + delay
+                )
+                tasks.append(task)
         return tasks
 
     async def start(self):
@@ -207,7 +213,7 @@ class AsyncSteamBot:
         while True:
             print("---------------------------------------")
             print(f"Iteration #{counter}")
-            queue = await self.create_task_queue(items=items, batch=2)
+            queue = await self.create_task_queue(items=items, batch=1)
             print("Запросов в пачке: ", len(queue))
             comleted_requests += len(queue)
             print("Всего выполненно запросов: ", comleted_requests)
@@ -237,7 +243,7 @@ class AsyncSteamBot:
             )
             item_obj.update_item_info()
             message = create_message(item_obj)
-            print(message)
+            # print(message)
             decision = self.calculate_sticker_profitability(item_obj)
 
     def print_log(item: ItemData):
