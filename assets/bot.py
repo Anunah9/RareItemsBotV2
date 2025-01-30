@@ -1,6 +1,8 @@
 import asyncio
 from dataclasses import dataclass
+import os
 from typing import Protocol
+from assets.buy import BuyModule
 from assets.config import Config
 from assets.parser import Parser, AsyncParser
 from assets.session import AsyncSteamSession, SteamSession
@@ -149,12 +151,14 @@ class AsyncSteamBot:
         itemInfoFetcher: IItemInfoFetcher,
         itemPriceFetcher: IItemPriceFetcher,
         config: Config,
+        buy_module: BuyModule
     ):
         self.session = session
         self.parser = parser
         self.itemInfoFetcher = itemInfoFetcher
         self.itemPriceFetcher = itemPriceFetcher
         self.config: Config = config
+        self.buy_module: BuyModule = buy_module
 
     @secundomer
     async def get_items_from_market(self, item_url):
@@ -173,6 +177,7 @@ class AsyncSteamBot:
             print(exc)
         else:
             self.process_items(item_name, listings)
+        await asyncio.sleep(1000)
 
     async def create_task_queue(self, items: list[dict], batch=1, batch_queue=10):
         """
@@ -201,24 +206,26 @@ class AsyncSteamBot:
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
         items = [
-            {
-                "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
-            },
-            {
-                "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
-            },
+            {"R8 Revolver | Bone Mask (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/R8%20Revolver%20%7C%20Bone%20Mask%20(Battle-Scarred)"},
+            # {
+            #     "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
+            # },
+            # {
+            #     "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
+            # },
         ]
         counter = 0
         comleted_requests = 0
         while True:
             print("---------------------------------------")
             print(f"Iteration #{counter}")
-            queue = await self.create_task_queue(items=items, batch=1)
+            queue = await self.create_task_queue(items=items, batch=1, batch_queue=1)
             print("Запросов в пачке: ", len(queue))
             comleted_requests += len(queue)
             print("Всего выполненно запросов: ", comleted_requests)
             await asyncio.gather(*queue)
             counter += 1
+            break
 
     def process_items(self, item_name, items):
 
@@ -228,6 +235,8 @@ class AsyncSteamBot:
         for item in items:
             listing_id = item.get("listing_id")
             price = item.get("price")
+            price_no_fee = item.get("price_no_fee")
+            fee = item.get("fee")
             if not price:
                 print("Item sold")
                 continue
@@ -243,8 +252,18 @@ class AsyncSteamBot:
             )
             item_obj.update_item_info()
             message = create_message(item_obj)
-            # print(message)
+
             decision = self.calculate_sticker_profitability(item_obj)
+            print(decision)
+            print(item_name, listing_id, int(price_no_fee+1), int(fee+1))
+            self.buy_module.buy_item(
+                item_name, listing_id, int(price_no_fee+1), int(fee+1))
+
+            if decision and self.config.autobuy:
+                print("buy")
+                print(message)
+                self.buy_module.buy_item(
+                    item_name, listing_id, price_no_fee, fee)
 
     def print_log(item: ItemData):
         print(

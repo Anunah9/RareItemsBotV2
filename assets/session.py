@@ -41,12 +41,15 @@ class SteamPyClient(ISteamClient):
     def get_session(self):
         return self._client._session
 
+    def get_client(self):
+        return self._client
+
     def is_alive(self):
         return self._client.is_session_alive()
 
 
 class SteamSession(ISteamSession):
-    def __init__(self, client: ISteamClient, username, password, path_to_mafile):
+    def __init__(self, client, username, password, path_to_mafile):
         self.client = client
         self.session = None
         self.username = username
@@ -132,6 +135,9 @@ class AsyncSteamSession(ISteamSession):
 
     def get_session(self):
         return self.client.get_session()
+
+    def get_client(self):
+        return self.client.get_client()
 
     def save_cookies_session(self, path):
         # Сохранение cookie в файл

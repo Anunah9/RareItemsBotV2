@@ -17,7 +17,7 @@ class AsyncParser:
     ):
         self.steam_session: AsyncSteamSession = session
         self.currency: Currency = currency
-        self.proxy_manager: ProxyManager = proxy_manager
+        self.proxy_manager: ProxyManager | None = proxy_manager
 
     async def get_raw_data_from_market(self, url: str) -> str:
         """Возвраает сырые json даные о списке лотов с ТП"""
@@ -35,7 +35,8 @@ class AsyncParser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(
+            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 
@@ -47,19 +48,21 @@ class AsyncParser:
         if currency_id is None:
             raise ValueError("Missing currency_id in item data")
         price = (price_no_fee + fee) / 100
-        return self.currency.change_currency(price, currency_id)
+        return self.currency.change_currency(price_no_fee, currency_id, target_currency_id=1), self.currency.change_currency(fee, currency_id, target_currency_id=1), self.currency.change_currency(price, currency_id)
 
     def extract_item_data(self, items_json: dict) -> list[dict]:
         """Формирует список данных о предметах."""
         extracted_items = []
         for listing_id, item_data in items_json.items():
             inspect_link = construct_inspect_link(item_data, listing_id)
-            price = self.calculate_price(item_data)
+            price_no_fee, fee, price = self.calculate_price(item_data)
             extracted_items.append(
                 {
                     "listing_id": listing_id,
                     "inspect_link": inspect_link,
                     "price": price,
+                    "price_no_fee": price_no_fee,
+                    "fee": fee
                 }
             )
         return extracted_items
@@ -82,7 +85,8 @@ class Parser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(
+            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 

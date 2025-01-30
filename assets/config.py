@@ -6,3 +6,4 @@ class Config:
     strick3: float
     strick45: float
     nostrick: float
+    autobuy: bool

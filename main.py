@@ -1,4 +1,5 @@
 import asyncio
+from assets.buy import BuyModule
 from assets.config import Config
 from assets.parser import AsyncParser
 from assets.prices import ItemPriceFetcher, MockItemPriceFetcher, PricesRepository
@@ -13,7 +14,7 @@ from assets.proxy import ProxyManager
 # Загрузка переменных окружения
 
 
-async def get_steam_session():
+async def get_steam_session(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE):
     steamclient = SteamPyClient()
     steam_session = AsyncSteamSession(
         steamclient, PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE
@@ -38,29 +39,35 @@ async def get_steam_session():
 
 
 async def create_bot():
-    steam_session = await get_steam_session()
+    steam_session_parser = await get_steam_session(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
     currency_rates = Currency(API_KEY)
     currency_rates.update_steam_currency_rates()
 
     proxy_manager = ProxyManager()
     proxy_manager.load_proxies("./proxies.txt")
-    parser = AsyncParser(steam_session, currency_rates, proxy_manager=proxy_manager)
+    parser = AsyncParser(steam_session_parser, currency_rates,
+                         proxy_manager=proxy_manager)
 
     item_info_fetcher = MockItemInfoFetcher()
     # item_price_fetcher = MockItemPriceFetcher()
 
-    # item_info_fetcher = ItemInfoFetcher()
+    item_info_fetcher = ItemInfoFetcher()
 
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
     item_price_fetcher.update_all_prices(currency=currency_rates)
 
-    strick3 = float(os.getenv("STRICK3"))
-    strick45 = float(os.getenv("STRICK45"))
-    nostrick = float(os.getenv("NOSTRICK"))
-    config = Config(strick3, strick45, nostrick)
+    STRICK3 = float(os.getenv("STRICK3"))
+    STRICK45 = float(os.getenv("STRICK45"))
+    NOSTRICK = float(os.getenv("NOSTRICK"))
+    AUTOBUY = bool(int(os.getenv("AUTOBUY")))
+    config = Config(STRICK3, STRICK45, NOSTRICK, AUTOBUY)
+
+    stema_client_buyer = await get_steam_session(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
+
+    buy_module = BuyModule(stema_client_buyer)
     return AsyncSteamBot(
-        steam_session, parser, item_info_fetcher, item_price_fetcher, config
+        steam_session_parser, parser, item_info_fetcher, item_price_fetcher, config, buy_module
     )
 
 
