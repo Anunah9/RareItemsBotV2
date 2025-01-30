@@ -1,0 +1,13 @@
+{
+    "API_KEY": "2BDF631FB91A0A9357B0EE2AB15AF479",
+    "STRICK3": 4,
+    "STRICK45": 3,
+    "NOSTRICK": 10,
+    "PARSER_LOGIN": "enduringlegisla",
+    "PARSER_PASSWORD": "UYLtVO0PvUz9X",
+    "PARSER_MAFILE": "./accounts/maFiles/enduringlegisla.txt",
+    "BUYER_LOGIN": "sanek0904",
+    "BUYER_PASSWORD": "Bazaranet101",
+    "BUYER_MAFILE": "./accounts/maFiles/sanek0904.txt",
+    "AUTOBUY": 0
+}

@@ -48,19 +48,23 @@ async def main():
 
     raw_data = await parser.get_raw_data_from_market(url=url)
     data = parser.extract_json_from_raw_data(raw_data=raw_data)
-    listing_id = list(data.keys())[0]
-    item = data[listing_id]
-    price_no_fee = item['converted_price']
-    fee = int(item['converted_fee'])
-    print(price_no_fee)
-    print(fee)
+    items = parser.extract_item_data(data)
+    item = items[0]
+    listing_id = item["listing_id"]
+    price = int(item['price'])
+    fee = int(item['fee'])
     pprint(item)
+    print(price)
+    print(fee)
 
-    client = SteamClient(API_KEY, PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
-    client.login(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
+    buy_module.buy_item(item_name, listing_id,
+                        price, fee)
 
-    client.market.buy_item(item_name, listing_id,
-                           price_no_fee+fee, fee,  GameOptions.CS, Currency.RUB)
+    # client = SteamClient(API_KEY, PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
+    # client.login(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
+
+    # client.market.buy_item(item_name, str(listing_id),
+    #                        price, fee,  GameOptions.CS, Currency.RUB)
 
 if __name__ == "__main__":
     dotenv_path = os.path.join(os.path.dirname(__file__), ".env")

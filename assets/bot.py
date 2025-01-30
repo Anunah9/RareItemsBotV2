@@ -235,7 +235,6 @@ class AsyncSteamBot:
         for item in items:
             listing_id = item.get("listing_id")
             price = item.get("price")
-            price_no_fee = item.get("price_no_fee")
             fee = item.get("fee")
             if not price:
                 print("Item sold")
@@ -255,15 +254,12 @@ class AsyncSteamBot:
 
             decision = self.calculate_sticker_profitability(item_obj)
             print(decision)
-            print(item_name, listing_id, int(price_no_fee+1), int(fee+1))
-            self.buy_module.buy_item(
-                item_name, listing_id, int(price_no_fee+1), int(fee+1))
 
             if decision and self.config.autobuy:
                 print("buy")
                 print(message)
                 self.buy_module.buy_item(
-                    item_name, listing_id, price_no_fee, fee)
+                    item_name, listing_id, price, fee)
 
     def print_log(item: ItemData):
         print(

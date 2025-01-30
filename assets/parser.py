@@ -42,13 +42,10 @@ class AsyncParser:
 
     def calculate_price(self, item_data: dict) -> float:
         """Вычисляет полную цену предмета (цена без комиссии + комиссия) в рублях"""
-        price_no_fee = int(item_data.get("price", 0))
-        fee = int(item_data.get("fee", 0))
-        currency_id = item_data.get("currencyid")  # id валюты предмета.
-        if currency_id is None:
-            raise ValueError("Missing currency_id in item data")
-        price = (price_no_fee + fee) / 100
-        return self.currency.change_currency(price_no_fee, currency_id, target_currency_id=1), self.currency.change_currency(fee, currency_id, target_currency_id=1), self.currency.change_currency(price, currency_id)
+        price_no_fee = int(item_data.get("converted_price", 0))
+        fee = int(item_data.get("converted_fee", 0))
+        price = price_no_fee + fee
+        return price_no_fee, fee, price
 
     def extract_item_data(self, items_json: dict) -> list[dict]:
         """Формирует список данных о предметах."""
