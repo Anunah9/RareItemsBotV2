@@ -23,9 +23,13 @@ class AsyncParser:
         """Возвраает сырые json даные о списке лотов с ТП"""
         proxy = self.proxy_manager.get_random_proxy()
         async with self.steam_session.get_async_session() as local_session:
-            response = await local_session.get(url, proxy=proxy)
+
+            response = await local_session.get(
+                url, proxy=proxy, ssl=False, timeout=5
+            )
             if response.status != 200:
-                raise Exception(f"Response complete with code error: {response.status}")
+                print("Запрос завершился с кодом: ", response.status)
+                # raise Exception(f"Response complete with code error: {response.status}")
             return await response.text()
 
     def extract_json_from_raw_data(self, raw_data: str):
