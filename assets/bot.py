@@ -168,7 +168,7 @@ class AsyncSteamBot:
 
     # TODO Сделать логгирование
     async def create_one_task(self, item_name, item_url: str, delay: float):
-        # await asyncio.sleep(2)  # Constant delay
+
         await asyncio.sleep(delay=delay)
 
         try:
@@ -177,9 +177,8 @@ class AsyncSteamBot:
             print(exc)
         else:
             self.process_items(item_name, listings)
-        await asyncio.sleep(1000)
 
-    async def create_task_queue(self, items: list[dict], batch=1, batch_queue=10):
+    async def create_task_queue(self, items: list[dict], batch=2, batch_queue=10):
         """
         Создает очередь запросов
         Args:
@@ -206,13 +205,12 @@ class AsyncSteamBot:
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
         items = [
-            {"R8 Revolver | Bone Mask (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/R8%20Revolver%20%7C%20Bone%20Mask%20(Battle-Scarred)"},
-            # {
-            #     "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
-            # },
-            # {
-            #     "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
-            # },
+            {
+                "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
+            },
+            {
+                "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
+            },
         ]
         counter = 0
         comleted_requests = 0
@@ -225,7 +223,6 @@ class AsyncSteamBot:
             print("Всего выполненно запросов: ", comleted_requests)
             await asyncio.gather(*queue)
             counter += 1
-            break
 
     def process_items(self, item_name, items):
 
