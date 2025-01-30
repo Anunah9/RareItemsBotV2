@@ -3,6 +3,6 @@ proxies.txt
 __pycache__
 venv
 accounts/
-.env
+config.txt
 .vscode
 db.db
