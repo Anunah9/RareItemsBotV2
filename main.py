@@ -11,6 +11,8 @@ import os
 from dotenv import load_dotenv
 from assets.inspect import MockItemInfoFetcher, ItemInfoFetcher
 from assets.proxy import ProxyManager
+from assets.utils import read_json_from_file
+from assets.database import Items, SqliteItemsRepository
 
 # Загрузка переменных окружения
 
@@ -18,9 +20,7 @@ from assets.proxy import ProxyManager
 async def get_steam_session(login, password, mafile):
     print(login, password, mafile)
     steamclient = SteamPyClient()
-    steam_session = AsyncSteamSession(
-        steamclient, login, password, mafile
-    )
+    steam_session = AsyncSteamSession(steamclient, login, password, mafile)
 
     try:
         steam_session.load_client("./accounts/")
@@ -41,19 +41,22 @@ async def get_steam_session(login, password, mafile):
 
 
 async def create_bot():
-    steam_session_parser = await get_steam_session(PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE)
+    steam_session_parser = await get_steam_session(
+        PARSER_LOGIN, PARSER_PASSWORD, PARSER_MAFILE
+    )
     currency_rates = Currency(API_KEY)
     currency_rates.update_steam_currency_rates()
 
     proxy_manager = ProxyManager()
     proxy_manager.load_proxies("./proxies.txt")
-    parser = AsyncParser(steam_session_parser, currency_rates,
-                         proxy_manager=proxy_manager)
+    parser = AsyncParser(
+        steam_session_parser, currency_rates, proxy_manager=proxy_manager
+    )
 
     item_info_fetcher = MockItemInfoFetcher()
-    # item_price_fetcher = MockItemPriceFetcher()
+    item_price_fetcher = MockItemPriceFetcher()
 
-    item_info_fetcher = ItemInfoFetcher()
+    # item_info_fetcher = ItemInfoFetcher()
 
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
@@ -61,38 +64,27 @@ async def create_bot():
 
     config = Config(STRICK3, STRICK45, NOSTRICK, AUTOBUY)
 
-    stema_client_buyer = await get_steam_session(BUYER_LOGIN, BUYER_PASSWORD, BUYER_MAFILE)
+    stema_client_buyer = await get_steam_session(
+        BUYER_LOGIN, BUYER_PASSWORD, BUYER_MAFILE
+    )
+    items_repository = SqliteItemsRepository("./db.db")
+    items = Items(items_repository)
 
     buy_module = BuyModule(stema_client_buyer)
     return AsyncSteamBot(
-        steam_session_parser, parser, item_info_fetcher, item_price_fetcher, config, buy_module
+        steam_session_parser,
+        parser,
+        item_info_fetcher,
+        item_price_fetcher,
+        config,
+        buy_module,
+        items,
     )
 
 
 async def main():
     bot = await create_bot()
     await bot.start()
-
-
-def read_json_from_file(file_path) -> dict:
-    """
-    Читает данные из текстового файла в формате JSON и возвращает их как словарь Python.
-
-    :param file_path: Путь к текстовому файлу с JSON-данными.
-    :return: Словарь Python с данными из файла.
-    :raises ValueError: Если файл содержит некорректный JSON.
-    :raises FileNotFoundError: Если файл не найден.
-    """
-    try:
-        # Открываем файл для чтения
-        with open(file_path, 'r', encoding='utf-8') as file:
-            # Загружаем данные из файла как JSON
-            data = json.load(file)
-            return data
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл не найден: {file_path}")
-    except json.JSONDecodeError:
-        raise ValueError(f"Файл содержит некорректный JSON: {file_path}")
 
 
 if __name__ == "__main__":
@@ -112,4 +104,3 @@ if __name__ == "__main__":
     AUTOBUY = bool(int(config_json.get("AUTOBUY")))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    loop.close()

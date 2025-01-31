@@ -3,7 +3,7 @@ from assets.currency_rates import Currency
 from assets.session import AsyncSteamSession, SteamSession
 import json
 from pprint import pprint
-from assets.utils import construct_inspect_link
+from assets.utils import construct_inspect_link, secundomer
 import aiohttp
 from assets.proxy import ProxyManager
 
@@ -17,16 +17,15 @@ class AsyncParser:
     ):
         self.steam_session: AsyncSteamSession = session
         self.currency: Currency = currency
-        self.proxy_manager: ProxyManager | None = proxy_manager
+        self.proxy_manager: ProxyManager = proxy_manager
 
+    @secundomer
     async def get_raw_data_from_market(self, url: str) -> str:
         """Возвраает сырые json даные о списке лотов с ТП"""
         proxy = self.proxy_manager.get_random_proxy()
         async with self.steam_session.get_async_session() as local_session:
 
-            response = await local_session.get(
-                url, proxy=proxy, ssl=False, timeout=5
-            )
+            response = await local_session.get(url, proxy=proxy, ssl=False, timeout=5)
             if response.status != 200:
                 print("Запрос завершился с кодом: ", response.status)
                 # raise Exception(f"Response complete with code error: {response.status}")
@@ -35,8 +34,7 @@ class AsyncParser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(
-            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 
@@ -59,7 +57,7 @@ class AsyncParser:
                     "inspect_link": inspect_link,
                     "price": price,
                     "price_no_fee": price_no_fee,
-                    "fee": fee
+                    "fee": fee,
                 }
             )
         return extracted_items
@@ -82,8 +80,7 @@ class Parser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(
-            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 

@@ -1,6 +1,28 @@
 from functools import reduce
+import json
 import time
 from assets.item import ItemData
+
+
+def read_json_from_file(file_path) -> dict:
+    """
+    Читает данные из текстового файла в формате JSON и возвращает их как словарь Python.
+
+    :param file_path: Путь к текстовому файлу с JSON-данными.
+    :return: Словарь Python с данными из файла.
+    :raises ValueError: Если файл содержит некорректный JSON.
+    :raises FileNotFoundError: Если файл не найден.
+    """
+    try:
+        # Открываем файл для чтения
+        with open(file_path, "r", encoding="utf-8") as file:
+            # Загружаем данные из файла как JSON
+            data = json.load(file)
+            return data
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл не найден: {file_path}")
+    except json.JSONDecodeError:
+        raise ValueError(f"Файл содержит некорректный JSON: {file_path}")
 
 
 def secundomer(func):

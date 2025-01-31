@@ -11,6 +11,7 @@ from pprint import pprint
 from assets.inspect import IItemInfoFetcher, MockItemInfoFetcher
 from assets.prices import IItemPriceFetcher, MockItemPriceFetcher
 from assets.utils import create_message, secundomer
+from assets.database import Items
 
 
 class ISteamBot(Protocol):
@@ -151,7 +152,8 @@ class AsyncSteamBot:
         itemInfoFetcher: IItemInfoFetcher,
         itemPriceFetcher: IItemPriceFetcher,
         config: Config,
-        buy_module: BuyModule
+        buy_module: BuyModule,
+        items: Items,
     ):
         self.session = session
         self.parser = parser
@@ -159,8 +161,8 @@ class AsyncSteamBot:
         self.itemPriceFetcher = itemPriceFetcher
         self.config: Config = config
         self.buy_module: BuyModule = buy_module
+        self.items: Items = items
 
-    @secundomer
     async def get_items_from_market(self, item_url):
         raw_data = await self.parser.get_raw_data_from_market(item_url)
         json_data = self.parser.extract_json_from_raw_data(raw_data=raw_data)
@@ -204,14 +206,16 @@ class AsyncSteamBot:
         if not self.session.is_alive():
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
-        items = [
-            {
-                "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
-            },
-            {
-                "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
-            },
-        ]
+        items = self.items.get_track_items()
+        print(items)
+        # items = [
+        #     {
+        #         "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
+        #     },
+        #     {
+        #         "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
+        #     },
+        # ]
         counter = 0
         comleted_requests = 0
         while True:
@@ -250,13 +254,12 @@ class AsyncSteamBot:
             message = create_message(item_obj)
 
             decision = self.calculate_sticker_profitability(item_obj)
-            print(decision)
+            # print(decision)
 
             if decision and self.config.autobuy:
                 print("buy")
                 print(message)
-                self.buy_module.buy_item(
-                    item_name, listing_id, price, fee)
+                self.buy_module.buy_item(item_name, listing_id, price, fee)
 
     def print_log(item: ItemData):
         print(
