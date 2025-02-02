@@ -263,9 +263,13 @@ class AsyncSteamBot:
                 if decision and self.config.autobuy:
                     print("buy")
                     print(message)
+                    try:
+                        self.buy_module.buy_item(
+                            item_name, listing_id, price, fee)
+                    except Exception as e:
+                        print(e)
                     self.items_manager.add_to_bought_items(
-                        item_name, listing_id, price, fee)
-                    self.buy_module.buy_item(item_name, listing_id, price, fee)
+                        item_name, listing_id, price, fee, item_obj.stickers_price)
 
     def print_log(item: ItemData):
         print(
