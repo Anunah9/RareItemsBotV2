@@ -1,12 +1,13 @@
 import asyncio
 from dataclasses import dataclass
 import os
+import time
 from typing import Protocol
 from assets.buy import BuyModule
 from assets.config import Config
 from assets.parser import Parser, AsyncParser
 from assets.session import AsyncSteamSession, SteamSession
-from assets.item import ItemData
+from assets.item import AsyncItemData, ItemData
 from pprint import pprint
 from assets.inspect import IItemInfoFetcher, MockItemInfoFetcher
 from assets.prices import IItemPriceFetcher, MockItemPriceFetcher
@@ -161,7 +162,7 @@ class AsyncSteamBot:
         self.itemPriceFetcher = itemPriceFetcher
         self.config: Config = config
         self.buy_module: BuyModule = buy_module
-        self.items: Items = items
+        self.items_manager: Items = items
 
     async def get_items_from_market(self, item_url):
         raw_data = await self.parser.get_raw_data_from_market(item_url)
@@ -178,7 +179,7 @@ class AsyncSteamBot:
         except Exception as exc:
             print(exc)
         else:
-            self.process_items(item_name, listings)
+            await self.process_items(item_name, listings)
 
     async def create_task_queue(self, items: list[dict], batch=2, batch_queue=10):
         """
@@ -195,7 +196,6 @@ class AsyncSteamBot:
 
                 delay = i % batch
                 item_name, item_url = next(iter(items[i].items()))
-
                 task = self.create_one_task(
                     item_name, item_url, delay=j * batch + delay
                 )
@@ -206,40 +206,42 @@ class AsyncSteamBot:
         if not self.session.is_alive():
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
-        items = self.items.get_track_items()
+        items = self.items_manager.get_track_items()
         print(items)
-        # items = [
-        #     {
-        #         "AK-47 | Slate (Field-Tested)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20(Field-Tested)"
-        #     },
-        #     {
-        #         "AK-47 | Slate (Battle-Scarred)": r"https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Slate%20%28Battle-Scarred%29"
-        #     },
-        # ]
         counter = 0
         comleted_requests = 0
         while True:
             print("---------------------------------------")
             print(f"Iteration #{counter}")
-            queue = await self.create_task_queue(items=items, batch=1, batch_queue=1)
+            queue = await self.create_task_queue(items=items, batch=1, batch_queue=10)
             print("Запросов в пачке: ", len(queue))
             comleted_requests += len(queue)
             print("Всего выполненно запросов: ", comleted_requests)
+            t1 = time.time()
             await asyncio.gather(*queue)
+            print(f"Время выполнения одной пачки: {time.time() - t1}")
             counter += 1
 
-    def process_items(self, item_name, items):
+    async def process_items(self, item_name, items):
 
         if not items:
             print(items)
             raise Exception("No items :(")
         for item in items:
             listing_id = item.get("listing_id")
+            # TODO Доделать
+            if not self.items_manager.check(listing_id):
+                self.items_manager.add_to_checked(listing_id)
+            else:
+                continue
+            # TODO
             price = item.get("price")
             fee = item.get("fee")
             if not price:
                 print("Item sold")
                 continue
+            else:
+                price /= 100
             inspect_link = item.get("inspect_link")
 
             item_obj = ItemData(
@@ -250,16 +252,20 @@ class AsyncSteamBot:
                 inspect_link,
                 price,
             )
-            item_obj.update_item_info()
-            message = create_message(item_obj)
-
-            decision = self.calculate_sticker_profitability(item_obj)
-            # print(decision)
-
-            if decision and self.config.autobuy:
-                print("buy")
+            try:
+                item_obj.update_item_info()
+            except Exception as e:
+                print("Запрос к inspect server, завершился с кодом: ", e)
+            else:
+                message = create_message(item_obj)
+                decision = self.calculate_sticker_profitability(item_obj)
                 print(message)
-                self.buy_module.buy_item(item_name, listing_id, price, fee)
+                if decision and self.config.autobuy:
+                    print("buy")
+                    print(message)
+                    self.items_manager.add_to_bought_items(
+                        item_name, listing_id, price, fee)
+                    self.buy_module.buy_item(item_name, listing_id, price, fee)
 
     def print_log(item: ItemData):
         print(
@@ -268,6 +274,9 @@ class AsyncSteamBot:
 
     def calculate_sticker_profitability(self, item: ItemData):
         # Если есть стрик, логику вычисления
+        if item.stickers_price < self.config.min_stickers_price:
+            return False
+
         if item.strick.strick:
             profit_threshold = {
                 3: self.config.strick3,

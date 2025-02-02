@@ -82,3 +82,60 @@ class ItemData:
 
     def get_stickers_sum_price(self, stickers):
         return sum(sticker['price'] for sticker in stickers)
+
+
+class AsyncItemData:
+    stickers: list[dict]
+    stickers_price: float
+    charm: dict
+    charm_price: float
+    strick: StickerStrick
+
+    def __init__(self, itemInfoFetcher: IItemInfoFetcher,
+                 itemPriceFetcher: IItemPriceFetcher,
+                 item_name: str,
+                 listing_id: str,
+                 inspect_link: str,
+                 item_price: float):
+        self.itemInfoFetcher = itemInfoFetcher
+        self.itemPriceFetcher = itemPriceFetcher
+        self.item_name = item_name
+        self.listing_id = listing_id
+        self.inspect_link = inspect_link
+        self.item_price = item_price
+
+    def update_stickers_prices(self):
+        for sticker in self.stickers:
+            sticker["price"] = self.itemPriceFetcher.get_price_by_name(
+                sticker.get("name"))
+
+    def get_charm_price(self):
+        return self.itemPriceFetcher.get_price_by_name(
+            self.charm.get("name"))
+
+    async def update_item_info(self):
+        # All info about item
+        item_info = self.itemInfoFetcher.get_sticker_and_charm_info(
+            self.inspect_link)
+
+        # Stickers
+        self.stickers = self.extract_sticker_info(item_info)
+        self.update_stickers_prices()
+        self.stickers_price = self.get_stickers_sum_price(self.stickers)
+
+        # Charm
+        self.charm = self.extract_charm_info(item_info)
+        self.charm_price = self.get_charm_price()
+
+        # Strick
+        self.strick = StickerStrick()
+        self.strick.update_strick_counter(self.stickers)
+
+    def extract_sticker_info(self, item_info):
+        return item_info.get("stickers", [])
+
+    def extract_charm_info(self, item_info):
+        return item_info.get("charm", {})
+
+    def get_stickers_sum_price(self, stickers):
+        return sum(sticker['price'] for sticker in stickers)

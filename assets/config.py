@@ -7,3 +7,4 @@ class Config:
     strick45: float
     nostrick: float
     autobuy: bool
+    min_stickers_price: float

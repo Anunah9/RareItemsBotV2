@@ -12,6 +12,20 @@ class SqliteItemsRepository:
 
         return [{item[0]: item[1]} for item in items]
 
+    def add_to_checked(self, listing_id):
+        self.db.cursor().execute(f"INSERT INTO Checked VALUES ({listing_id})")
+        self.db.commit()
+
+    def check(self, listing_id) -> bool:
+        if self.db.cursor().execute(f"SELECT * FROM Checked WHERE listingid={listing_id}").fetchone():
+            return True
+        return False
+
+    def add_to_bought_items(self, item_name, listing_id, price, fee, stickers_price):
+        self.db.cursor().execute(
+            f"INSERT INTO BoughtItems VALUES (\"{item_name}\", {listing_id}, {price}, {fee}, {stickers_price})")
+        self.db.commit()
+
 
 class Items:
     def __init__(self, repository: SqliteItemsRepository):
@@ -19,3 +33,12 @@ class Items:
 
     def get_track_items(self):
         return self.repository.get_track_items()
+
+    def add_to_checked(self, listing_id):
+        self.repository.add_to_checked(listing_id)
+
+    def check(self, listing_id) -> bool:
+        return self.repository.check(listing_id)
+
+    def add_to_bought_items(self, item_name, listing_id, price, fee, stickers_price):
+        return self.repository.add_to_bought_items(item_name, listing_id, price, fee, stickers_price)

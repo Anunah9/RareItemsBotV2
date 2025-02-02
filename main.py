@@ -9,7 +9,7 @@ from assets.bot import AsyncSteamBot, SteamBot
 from assets.currency_rates import Currency
 import os
 from dotenv import load_dotenv
-from assets.inspect import MockItemInfoFetcher, ItemInfoFetcher
+from assets.inspect import AsyncItemInfoFetcher, MockItemInfoFetcher, ItemInfoFetcher
 from assets.proxy import ProxyManager
 from assets.utils import read_json_from_file
 from assets.database import Items, SqliteItemsRepository
@@ -21,7 +21,7 @@ async def get_steam_session(login, password, mafile):
     print(login, password, mafile)
     steamclient = SteamPyClient()
     steam_session = AsyncSteamSession(steamclient, login, password, mafile)
-
+    # steam_session.login()
     try:
         steam_session.load_client("./accounts/")
         steam_session.async_session = steam_session.get_async_session()
@@ -53,16 +53,17 @@ async def create_bot():
         steam_session_parser, currency_rates, proxy_manager=proxy_manager
     )
 
-    item_info_fetcher = MockItemInfoFetcher()
-    item_price_fetcher = MockItemPriceFetcher()
+    # item_info_fetcher = MockItemInfoFetcher()
+    # item_price_fetcher = MockItemPriceFetcher()
 
-    # item_info_fetcher = ItemInfoFetcher()
+    item_info_fetcher = ItemInfoFetcher()
+    # item_info_fetcher = AsyncItemInfoFetcher()
 
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
     item_price_fetcher.update_all_prices(currency=currency_rates)
 
-    config = Config(STRICK3, STRICK45, NOSTRICK, AUTOBUY)
+    config = Config(STRICK3, STRICK45, NOSTRICK, AUTOBUY, MIN_STICKERS_PRICE)
 
     stema_client_buyer = await get_steam_session(
         BUYER_LOGIN, BUYER_PASSWORD, BUYER_MAFILE
@@ -102,5 +103,6 @@ if __name__ == "__main__":
     STRICK45 = float(config_json.get("STRICK45"))
     NOSTRICK = float(config_json.get("NOSTRICK"))
     AUTOBUY = bool(int(config_json.get("AUTOBUY")))
+    MIN_STICKERS_PRICE = float(config_json.get("MIN_STICKERS_PRICE"))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
