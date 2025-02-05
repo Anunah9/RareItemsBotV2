@@ -1,3 +1,7 @@
+from pprint import pprint
+import requests
+import urllib
+from urllib.parse import urlunparse
 import asyncio
 import json
 from assets.buy import BuyModule
@@ -14,11 +18,39 @@ from assets.proxy import ProxyManager
 from assets.utils import read_json_from_file
 from assets.database import Items, SqliteItemsRepository
 
-# Загрузка переменных окружения
+
+def get_items_from_file(file_path: str):
+    with open(file_path, "r") as f:
+        return f.read().split("\n")
+
+
+def get_all_exterior_for_item(item: str):
+    exteriors = ["(Factory New)", "(Minimal Wear)", "(Field-Tested)",
+                 "(Well-Worn)", "(Battle-Scarred)"]
+    return [" ".join((item, exterior)) for exterior in exteriors]
+
+
+def build_url(item_name):
+    # Returns a list in the structure of urlparse.ParseResult
+    base_url = "https://steamcommunity.com/market/listings/730/"
+    encoded_item_name = urllib.parse.quote(item_name)
+
+    # Формируем итоговый URL
+    return base_url + encoded_item_name
+
+
+def get_items():
+    items = get_items_from_file("./items_raw.txt")
+    result = []
+    # for item in items:
+    # items_with_exterior = get_all_exterior_for_item(item)
+    for i in items:
+        result.append({i: build_url(i)})
+    return result
 
 
 async def get_steam_session(login, password, mafile):
-    print(login, password, mafile)
+
     steamclient = SteamPyClient()
     steam_session = AsyncSteamSession(steamclient, login, password, mafile)
     # steam_session.login()
@@ -50,42 +82,18 @@ async def create_bot():
     proxy_manager = ProxyManager()
     proxy_manager.load_proxies("./proxies.txt")
     parser = AsyncParser(
-        steam_session_parser, proxy_manager=proxy_manager
+        steam_session_parser, currency_rates, proxy_manager=proxy_manager
     )
 
-    # item_info_fetcher = MockItemInfoFetcher()
-    # item_price_fetcher = MockItemPriceFetcher()
-
     item_info_fetcher = ItemInfoFetcher()
-    # item_info_fetcher = AsyncItemInfoFetcher()
-
     price_repository = PricesRepository("./db.db")
     item_price_fetcher = ItemPriceFetcher(db_repostiotory=price_repository)
     item_price_fetcher.update_all_prices(currency=currency_rates)
 
-    config = Config(STRICK3, STRICK45, NOSTRICK, AUTOBUY, MIN_STICKERS_PRICE)
-
-    stema_client_buyer = await get_steam_session(
-        BUYER_LOGIN, BUYER_PASSWORD, BUYER_MAFILE
-    )
-    items_repository = SqliteItemsRepository("./db.db")
-    items = Items(items_repository)
-
-    buy_module = BuyModule(stema_client_buyer)
-    return AsyncSteamBot(
-        steam_session_parser,
-        parser,
-        item_info_fetcher,
-        item_price_fetcher,
-        config,
-        buy_module,
-        items,
-    )
-
 
 async def main():
-    bot = await create_bot()
-    await bot.start()
+    items = get_items()
+    pprint(items)
 
 
 if __name__ == "__main__":
@@ -95,14 +103,5 @@ if __name__ == "__main__":
     PARSER_PASSWORD = config_json.get("PARSER_PASSWORD")
     PARSER_MAFILE = config_json.get("PARSER_MAFILE")
 
-    BUYER_LOGIN = config_json.get("BUYER_LOGIN")
-    BUYER_PASSWORD = config_json.get("BUYER_PASSWORD")
-    BUYER_MAFILE = config_json.get("BUYER_MAFILE")
-
-    STRICK3 = float(config_json.get("STRICK3"))
-    STRICK45 = float(config_json.get("STRICK45"))
-    NOSTRICK = float(config_json.get("NOSTRICK"))
-    AUTOBUY = bool(int(config_json.get("AUTOBUY")))
-    MIN_STICKERS_PRICE = float(config_json.get("MIN_STICKERS_PRICE"))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())

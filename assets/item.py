@@ -63,6 +63,7 @@ class ItemData:
 
         # Stickers
         self.stickers = self.extract_sticker_info(item_info)
+
         self.update_stickers_prices()
         self.stickers_price = self.get_stickers_sum_price(self.stickers)
 
@@ -75,7 +76,12 @@ class ItemData:
         self.strick.update_strick_counter(self.stickers)
 
     def extract_sticker_info(self, item_info):
-        return item_info.get("stickers", [])
+        stickers = item_info.get("stickers", [])
+        res_stickers = []
+        for sticker in stickers:
+            if not sticker.get("wear", None):
+                res_stickers.append(sticker)
+        return res_stickers
 
     def extract_charm_info(self, item_info):
         return item_info.get("charm", {})
@@ -132,7 +138,9 @@ class AsyncItemData:
         self.strick.update_strick_counter(self.stickers)
 
     def extract_sticker_info(self, item_info):
-        return item_info.get("stickers", [])
+        stickers = item_info.get("stickers", [])
+        print(stickers)
+        return stickers
 
     def extract_charm_info(self, item_info):
         return item_info.get("charm", {})

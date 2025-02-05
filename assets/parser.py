@@ -12,11 +12,9 @@ class AsyncParser:
     def __init__(
         self,
         session: AsyncSteamSession,
-        currency: Currency,
         proxy_manager: ProxyManager,
     ):
         self.steam_session: AsyncSteamSession = session
-        self.currency: Currency = currency
         self.proxy_manager: ProxyManager = proxy_manager
 
     @secundomer
@@ -34,7 +32,8 @@ class AsyncParser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(
+            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 
@@ -80,7 +79,8 @@ class Parser:
     def extract_json_from_raw_data(self, raw_data: str):
         soup = BeautifulSoup(raw_data, "lxml")
         items_table = soup.findAll("script", {"type": "text/javascript"})
-        items = str(items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
+        items = str(
+            items_table[-1]).split("var g_rgListingInfo = ")[1].split(";")[0]
 
         return json.loads(items)
 

@@ -206,14 +206,17 @@ class AsyncSteamBot:
         if not self.session.is_alive():
             raise Exception("Session is not alive")
         print("Bot started with an active session.")
-        items = self.items_manager.get_track_items()
-        print(items)
+
         counter = 0
         comleted_requests = 0
         while True:
+
             print("---------------------------------------")
+
+            items = self.items_manager.get_track_items()
             print(f"Iteration #{counter}")
-            queue = await self.create_task_queue(items=items, batch=1, batch_queue=10)
+            pprint(items)
+            queue = await self.create_task_queue(items=items, batch=1, batch_queue=20)
             print("Запросов в пачке: ", len(queue))
             comleted_requests += len(queue)
             print("Всего выполненно запросов: ", comleted_requests)
@@ -265,11 +268,12 @@ class AsyncSteamBot:
                     print(message)
                     try:
                         self.buy_module.buy_item(
-                            item_name, listing_id, price, fee)
-                    except Exception as e:
-                        print(e)
-                    self.items_manager.add_to_bought_items(
-                        item_name, listing_id, price, fee, item_obj.stickers_price)
+                            item_name, listing_id, price*100, fee)
+
+                        self.items_manager.add_to_bought_items(
+                            item_name, listing_id, price*100, fee, item_obj.stickers_price)
+                    except:
+                        print("Ошибка")
 
     def print_log(item: ItemData):
         print(
@@ -290,7 +294,7 @@ class AsyncSteamBot:
 
             if profit_threshold:
                 sticker_profitability = item.strick.sum_price_strick / item.item_price
-                if sticker_profitability > profit_threshold:
+                if sticker_profitability > profit_threshold and item.strick.sum_price_strick > self.config.min_stickers_price:
                     print("Покупаем")
                     return True
         else:
