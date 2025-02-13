@@ -13,7 +13,8 @@ from assets.inspect import AsyncItemInfoFetcher, MockItemInfoFetcher, ItemInfoFe
 from assets.proxy import ProxyManager
 from assets.utils import read_json_from_file
 from assets.database import Items, SqliteItemsRepository
-
+from assets.logger import logger
+import asyncio
 # Загрузка переменных окружения
 
 
@@ -87,7 +88,7 @@ async def main():
     bot = await create_bot()
     await bot.start()
 
-
+# TODO Пофиксить Server disconnected добавить проверку сессии
 if __name__ == "__main__":
     config_json = read_json_from_file("./config.txt")
     API_KEY = config_json.get("API_KEY")
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     BUYER_LOGIN = config_json.get("BUYER_LOGIN")
     BUYER_PASSWORD = config_json.get("BUYER_PASSWORD")
     BUYER_MAFILE = config_json.get("BUYER_MAFILE")
-
+    
     STRICK3 = float(config_json.get("STRICK3"))
     STRICK45 = float(config_json.get("STRICK45"))
     NOSTRICK = float(config_json.get("NOSTRICK"))
