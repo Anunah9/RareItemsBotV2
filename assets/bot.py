@@ -199,7 +199,7 @@ class AsyncSteamBot:
                 delay = i % batch
                 item_name, item_url = next(iter(items[i].items()))
                 task = self.create_one_task(
-                    item_name, item_url, delay=(j * batch + delay)*koef
+                    item_name, item_url, delay=(j * batch + delay) * koef
                 )
                 tasks.append(task)
         return tasks
@@ -227,7 +227,7 @@ class AsyncSteamBot:
             print(f"Время выполнения одной пачки: {time.time() - t1}")
             counter += 1
 
-    async def process_items(self, item_name, items):
+    async def process_items(self, item_name: str, items: list[dict]):
 
         if not items:
             print(items)
@@ -245,10 +245,9 @@ class AsyncSteamBot:
             if not price:
                 print("Item sold")
                 continue
-            else:
-                price /= 100
-            inspect_link = item.get("inspect_link")
 
+            inspect_link = item.get("inspect_link")
+            price /= 100
             item_obj = ItemData(
                 self.itemInfoFetcher,
                 self.itemPriceFetcher,
@@ -271,14 +270,23 @@ class AsyncSteamBot:
                     print(message)
                     try:
                         self.buy_module.buy_item(
-                            item_name, listing_id, price*100, fee)
+                            item_name, listing_id, price * 100, fee
+                        )
 
                         self.items_manager.add_to_bought_items(
-                            item_name, listing_id, price, item_obj.stickers_price, datetime.now())
+                            item_name,
+                            listing_id,
+                            price,
+                            item_obj.stickers_price,
+                            datetime.now(),
+                        )
                         logger.info(
-                            f"Bought item {item_name, listing_id, price*100, fee, item_obj.stickers_price}")
+                            f"Bought item {item_name, listing_id, price*100, fee, item_obj.stickers_price}"
+                        )
                     except Exception as exc:
-                        logger.error(f"Error in buy module:{exc}. Item: {item_name, listing_id, price*100, fee, item_obj.stickers_price}")
+                        logger.error(
+                            f"Error in buy module:{exc}. Item: {item_name, listing_id, price*100, fee, item_obj.stickers_price}"
+                        )
                         print("Ошибка")
 
     def print_log(item: ItemData):
@@ -300,7 +308,10 @@ class AsyncSteamBot:
 
             if profit_threshold:
                 sticker_profitability = item.strick.sum_price_strick / item.item_price
-                if sticker_profitability > profit_threshold and item.strick.sum_price_strick > self.config.min_stickers_price:
+                if (
+                    sticker_profitability > profit_threshold
+                    and item.strick.sum_price_strick > self.config.min_stickers_price
+                ):
                     print("Покупаем")
                     return True
         else:

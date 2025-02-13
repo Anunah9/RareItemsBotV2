@@ -41,3 +41,21 @@ client_session: <aiohttp.client.ClientSession object at 0x000001BE3A4EBFD0>
 client_session: <aiohttp.client.ClientSession object at 0x000001E726C8BD00>
 2025-02-12 18:24:52,173 - asyncio - ERROR - Unclosed client session
 client_session: <aiohttp.client.ClientSession object at 0x000001B40D08BFA0>
+2025-02-13 13:21:33,249 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001CEC22530E0>
+2025-02-13 13:53:49,656 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x00000279396930E0>
+2025-02-13 13:53:57,251 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001CAA84A30E0>
+2025-02-13 13:54:02,942 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000002831BBD30E0>
+2025-02-13 13:54:08,846 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000021E898330E0>
+2025-02-13 13:55:33,073 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x00000171C01130E0>
+2025-02-13 13:55:37,272 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x00000170AFA330E0>
+2025-02-13 15:57:14,693 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001B603D630E0>
+2025-02-13 15:57:38,393 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001B603DFC2D0>

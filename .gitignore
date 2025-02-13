@@ -6,3 +6,5 @@ accounts/
 config.txt
 .vscode
 db.db
+log.log
+.pytest_cache
