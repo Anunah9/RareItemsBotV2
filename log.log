@@ -1,0 +1,43 @@
+2025-02-07 13:02:59,749 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-07 19:42:49,703 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000024E7388BDC0>
+2025-02-07 22:56:39,219 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-08 14:07:16,203 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000021BF2CA2F20>
+2025-02-08 17:50:32,204 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-08 18:36:22,961 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-08 22:02:15,554 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001F9FBF5BE20>
+2025-02-08 22:18:28,233 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-09 02:21:01,139 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.
+2025-02-09 19:43:54,202 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: There was a problem purchasing your item. The listing may have been removed. Refresh the page and try again.. Item: ('AK-47 | Elite Build (Well-Worn)', '661568193552933856', 16068.0, 2095, 923.52)
+2025-02-09 20:58:31,943 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: There was a problem purchasing your item. The listing may have been removed. Refresh the page and try again.. Item: ('AK-47 | Slate (Well-Worn)', '664945893270979092', 41093.0, 5359, 1047.72)
+2025-02-09 22:20:44,825 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001FFC6CEBA30>
+2025-02-09 22:20:57,856 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001FFC7633A00>
+2025-02-10 01:18:16,264 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.. Item: ('AK-47 | Slate (Minimal Wear)', '648057394671233065', 74475.0, 9714, 1773.36)
+2025-02-10 05:20:48,202 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.. Item: ('AK-47 | Slate (Battle-Scarred)', '649183294576388256', 43697.0, 5698, 1330.02)
+2025-02-10 20:05:10,681 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.. Item: ('AK-47 | Elite Build (Field-Tested)', '635672495697289333', 19800.0, 2581, 2345.7100000000005)
+2025-02-11 06:00:33,669 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000024CAA55BF40>
+2025-02-11 06:00:42,665 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000024CAAEAFF10>
+2025-02-11 18:50:03,999 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.. Item: ('AK-47 | Elite Build (Factory New)', '649183294585920636', 76935.0, 10035, 1679.68)
+2025-02-11 19:41:27,371 - asyncio - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost(SSLError(1, '..._ssl.c:2672)'))
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost(SSLError(1, '..._ssl.c:2672)'))>
+Traceback (most recent call last):
+  File "C:\Users\Hanuna\AppData\Local\Programs\Python\Python310\lib\asyncio\events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+  File "C:\Users\Hanuna\AppData\Local\Programs\Python\Python310\lib\asyncio\proactor_events.py", line 162, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+OSError: [WinError 10022] Получен недопустимый аргумент
+2025-02-11 21:42:14,855 - asyncio - ERROR - Error in buy module:There was a problem buying this item. Message: You cannot purchase this item because somebody else has already purchased it.. Item: ('AK-47 | Slate (Well-Worn)', '666071793184471055', 45831.0, 5977, 1804.42)
+2025-02-12 18:15:40,022 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x0000029759E8BFD0>
+2025-02-12 18:15:54,348 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001BE3A4EBFD0>
+2025-02-12 18:18:12,590 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001E726C8BD00>
+2025-02-12 18:24:52,173 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001B40D08BFA0>

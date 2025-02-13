@@ -21,9 +21,9 @@ class SqliteItemsRepository:
             return True
         return False
 
-    def add_to_bought_items(self, item_name, listing_id, price, fee, stickers_price):
+    def add_to_bought_items(self, item_name, listing_id, price, stickers_price, date):
         self.db.cursor().execute(
-            f"INSERT INTO BoughtItems VALUES (\"{item_name}\", {listing_id}, {price}, {fee}, {stickers_price})")
+            f"INSERT INTO BoughtItems VALUES (\"{item_name}\", {listing_id}, {price}, {stickers_price}, \"{date}\")")
         self.db.commit()
 
 
@@ -40,5 +40,5 @@ class Items:
     def check(self, listing_id) -> bool:
         return self.repository.check(listing_id)
 
-    def add_to_bought_items(self, item_name, listing_id, price, fee, stickers_price):
-        return self.repository.add_to_bought_items(item_name, listing_id, price, fee, stickers_price)
+    def add_to_bought_items(self, item_name, listing_id, price,  stickers_price, date):
+        return self.repository.add_to_bought_items(item_name, listing_id, price, stickers_price, date)

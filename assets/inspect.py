@@ -44,6 +44,7 @@ class ItemInfoFetcher(IItemInfoFetcher):
         params = {
             'url': inspect_link
         }
+        
         response = requests.get(url, params=params)
         if response.status_code != 200:
             raise Exception(

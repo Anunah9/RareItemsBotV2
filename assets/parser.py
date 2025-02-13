@@ -6,6 +6,7 @@ from pprint import pprint
 from assets.utils import construct_inspect_link, secundomer
 import aiohttp
 from assets.proxy import ProxyManager
+from assets.logger import logger
 
 
 class AsyncParser:
@@ -22,7 +23,6 @@ class AsyncParser:
         """Возвраает сырые json даные о списке лотов с ТП"""
         proxy = self.proxy_manager.get_random_proxy()
         async with self.steam_session.get_async_session() as local_session:
-
             response = await local_session.get(url, proxy=proxy, ssl=False, timeout=5)
             if response.status != 200:
                 print("Запрос завершился с кодом: ", response.status)

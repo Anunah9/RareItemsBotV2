@@ -1,5 +1,7 @@
 import asyncio
+from asyncio.log import logger
 from dataclasses import dataclass
+from datetime import datetime
 import os
 import time
 from typing import Protocol
@@ -193,11 +195,11 @@ class AsyncSteamBot:
         tasks = []
         for j in range(batch_queue):
             for i in range(0, len(items)):
-
+                koef = 0.8
                 delay = i % batch
                 item_name, item_url = next(iter(items[i].items()))
                 task = self.create_one_task(
-                    item_name, item_url, delay=j * batch + delay
+                    item_name, item_url, delay=(j * batch + delay)*koef
                 )
                 tasks.append(task)
         return tasks
@@ -262,6 +264,7 @@ class AsyncSteamBot:
             else:
                 message = create_message(item_obj)
                 decision = self.calculate_sticker_profitability(item_obj)
+
                 print(message)
                 if decision and self.config.autobuy:
                     print("buy")
@@ -271,8 +274,11 @@ class AsyncSteamBot:
                             item_name, listing_id, price*100, fee)
 
                         self.items_manager.add_to_bought_items(
-                            item_name, listing_id, price*100, fee, item_obj.stickers_price)
-                    except:
+                            item_name, listing_id, price, item_obj.stickers_price, datetime.now())
+                        logger.info(
+                            f"Bought item {item_name, listing_id, price*100, fee, item_obj.stickers_price}")
+                    except Exception as exc:
+                        logger.error(f"Error in buy module:{exc}. Item: {item_name, listing_id, price*100, fee, item_obj.stickers_price}")
                         print("Ошибка")
 
     def print_log(item: ItemData):
